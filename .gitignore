@@ -1,0 +1,21 @@
+#
+# Décrit les fichiers ignorés par git
+#
+
+# Fichiers temporaires/de sauvegarde auto...
+*.autosave
+*~
+\#*#
+
+# Fichiers cachés
+.*
+
+# NFS/Apache de l'IUT
+*.m2
+.nfs*
+
+# Fichiers générés (compilation/objets...)
+*.o
+*.d
+/Builds
+

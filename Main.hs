@@ -1,27 +1,48 @@
-import Control.Monad
-import Control.Exception
-import Data.Char
-import System.IO
-import System.IO.Error
-import Network
-import Network.BSD
-import Network.Socket
-import System.Environment
-import System.Process
+{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 
-main = do sock <- bracketOnError
-                     (getProtocolNumber "tcp" >>= socket AF_INET Stream)
-                     close
-                     (\sock -> do setSocketOption sock ReuseAddr 1
-                                  [host,port] <- getArgs
-                                  inet <- inet_addr host
-                                  bindSocket sock $ SockAddrInet (fromIntegral $ read port) inet
-                                  listen sock maxListenQueue
-                                  return sock
-                     )
-          packages <- readProcess "ghc-pkg" ["list", "--simple-output"] []
-          let response = "HTTP/1.1 200 OK\r\n\r\nWelcome to Haskell Cloud! The following packages are pre-installed:\n\n" ++ unlines (words packages)
-          forever $ do (handle,_,_) <- Network.accept sock
-                       read <- liftM (any (null . dropWhile isSpace) . lines) $ hGetContents handle
-                       when read $ void $ tryIOError $ hPutStr handle response
-                       hClose handle
+module Main where
+
+import Control.Applicative ((<$>), optional)
+import Data.Maybe (fromMaybe)
+import Data.Text (Text)
+import Data.Text.Lazy (unpack)
+import Happstack.Lite
+import Text.Blaze.Html5 (Html, (!), a, form, input, p, toHtml, label)
+import Text.Blaze.Html5.Attributes (action, enctype, href, name, size, type_, value)
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
+
+-- import qualified Blog
+-- import qualified Code
+-- import qualified Portfolio
+-- import qualified Photos
+-- import qualified CV
+
+main = serve Nothing website
+
+website :: ServerPart Response
+website = msum
+            [ dir "test" $ ok $ page "route-test"
+            , ok $ page "home"
+            ]
+-- website = msum
+--           [ dir "blog"    $ Blog.main
+--           , dir "code"    $ Portfolio.main
+--           , dir "photos"  $ Photos.main
+--           , dir "cv"      $ CV.main
+--           , Blog.main
+--           ]
+
+page x = toResponse $
+       H.html $ do
+         --H.head $ do
+         --  H.title (toHtml "test")
+         H.body $ do
+           p $ do
+             "this is a "
+             a ! href "#" $ "test"
+             ", "
+             x
+           --body
+
+
