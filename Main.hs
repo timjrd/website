@@ -2,6 +2,7 @@
 
 module Main where
 
+import System.Environment (getArgs)
 import Control.Applicative ((<$>), optional)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
@@ -18,7 +19,13 @@ import qualified Text.Blaze.Html5.Attributes as A
 -- import qualified Photos
 -- import qualified CV
 
-main = serve Nothing website
+main = do
+  args <- getArgs
+  serve
+    (Just $ ServerConfig (read $ args!!1) (ramQuota d) (diskQuota d) (tmpDir d))
+    website
+  where d = defaultServerConfig
+  
 
 website :: ServerPart Response
 website = msum
