@@ -33,9 +33,11 @@ website = msum
           , dir "photos"  $ tmp
           , dir "cv"      $ tmp
           , dir "static"  $ static
+          , dir "static2"  $ static'
           , tmp
           ]
 
 tmp = ok $ toResponse $ page "home" [] ""
 
 static = serveDirectory EnableBrowsing [] ".."
+static' = serveDirectory EnableBrowsing [] "."
