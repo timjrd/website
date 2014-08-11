@@ -6,3 +6,4 @@ build-type:    Simple
 executable server
   main-is:       Main.hs
   build-depends: base, text, blaze-html, happstack-lite
+
