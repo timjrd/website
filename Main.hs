@@ -38,4 +38,4 @@ website = msum
 
 tmp = ok $ toResponse $ page "home" [] ""
 
-static = serveDirectory EnableBrowsing [] "/"
+static = serveDirectory EnableBrowsing [] ".."
