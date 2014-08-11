@@ -8,6 +8,7 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Text.Lazy (unpack)
 import Happstack.Lite
+import qualified Happstack.Server as S
 import Text.Blaze.Html5 (Html, (!), a, form, input, p, toHtml, label)
 import Text.Blaze.Html5.Attributes (action, enctype, href, name, size, type_, value)
 import qualified Text.Blaze.Html5 as H
@@ -20,12 +21,9 @@ import qualified Text.Blaze.Html5.Attributes as A
 -- import qualified CV
 
 main = do
-  args <- getArgs
-  serve
-    (Just $ ServerConfig (read $ args!!1) (ramQuota d) (diskQuota d) (tmpDir d))
-    website
-  where d = defaultServerConfig
-  
+  [host,port] <- getArgs
+  s <- S.bindIPv4 host (read port)
+  S.simpleHTTPWithSocket s (S.nullConf {S.port=(read port)}) $ website
 
 website :: ServerPart Response
 website = msum
