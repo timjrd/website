@@ -32,12 +32,10 @@ website = msum
           , dir "code"    $ tmp
           , dir "photos"  $ tmp
           , dir "cv"      $ tmp
-          , dir "static"  $ static
-          , dir "static2"  $ static'
+          --, dir "static"  $ static
           , tmp
           ]
 
 tmp = ok $ toResponse $ page "home" [] ""
 
 static = serveDirectory EnableBrowsing [] ".."
-static' = serveDirectory EnableBrowsing [] "."
