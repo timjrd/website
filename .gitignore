@@ -17,5 +17,6 @@
 # Fichiers générés (compilation/objets...)
 *.o
 *.d
+*.hi
 /Builds
 
