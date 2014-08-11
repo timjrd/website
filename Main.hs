@@ -39,15 +39,15 @@ website = msum
 --           ]
 
 page x = toResponse $
-       H.html $ do
-         --H.head $ do
-         --  H.title (toHtml "test")
-         H.body $ do
-           p $ do
-             "this is a "
-             a ! href "#" $ "test"
-             ", "
-             x
-           --body
+         H.docTypeHtml $ do
+           H.head $ do
+             H.title "test"
+           H.body $ do
+             p $ do
+               "this is a "
+               a ! href "#" $ "test"
+               ", "
+               x
+
 
 
