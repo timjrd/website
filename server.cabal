@@ -5,6 +5,7 @@ build-type:    Simple
 
 executable server
   main-is:       Main.hs
-  build-depends: base, text, time
-               , blaze-html, happstack-lite, happstack-server
+  build-depends: base, containers, text, bytestring, split, time, transformers, mtl, HTTP
+               , blaze-html, happstack-lite, happstack-server, acid-state, safecopy
+               , pwstore-fast
 
