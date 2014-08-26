@@ -1,8 +1,6 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 
-module Templates where
-
-import Conf
+module Shared where
 
 import Control.Monad
 import Text.Blaze.XHtml5
@@ -10,15 +8,34 @@ import Text.Blaze.XHtml5.Attributes
 import qualified Text.Blaze.XHtml5 as H
 import qualified Text.Blaze.XHtml5.Attributes as A
 
-page thetitle current thebody = docTypeHtml $ do
+import Happstack.Lite
+import Happstack.Lite as Hap
+
+---- Paths
+
+staticDir    = "/static"   :: String
+stylesheet   = "/static/style.css" :: String
+faceImg      = "/static/face.jpg"  :: String
+cvPdf        = "/static/timothee-jourde-cv.pdf" :: String
+--imgDir = staticDir ++ "/img"
+
+seeOther' :: String -> String -> ServerPart Response
+seeOther' url desc = seeOther url $ toResponse desc
+
+---- Templates
+page :: ToMarkup a => String -> String -> Bool -> a -> Response
+page thetitle current admin thebody = toResponse $ docTypeHtml $ do
   H.head $ do
-    H.title (toHtml thetitle)
+    H.title (toHtml $ "Timothée Jourde - " ++ thetitle)
     link ! rel "stylesheet" ! type_ "text/css" ! href (toValue stylesheet)
     
   body ! class_ (toValue current) $ do
     header $ do
       h1 "timothée jourde"
       h2 "site perso"
+      if admin
+        then a ! A.id "login"  ! href "/logout" $ "logout"
+        else a ! A.id "logout" ! href "/login"  $ "login"
     
     nav $ do
       entry "/blog"   "blog"
@@ -32,7 +49,28 @@ page thetitle current thebody = docTypeHtml $ do
         entry ref name = let e = if current == name then a ! class_ "current" else a
                             in e ! href (toValue ref) $ (toHtml name)
 
+loginPage :: String -> Response
+loginPage goto = toResponse $ docTypeHtml $ do
+  H.head $ do
+      H.title "Timothée Jourde - Login"
+      link ! rel "stylesheet" ! type_ "text/css" ! href (toValue stylesheet)
 
+  body ! class_ "login" $ do
+    H.form ! action (toValue goto) ! A.method "post" $ do
+      loginInput
+      input ! type_ "hidden" ! A.name "loginRedirect" ! value "true"
+      input ! type_ "submit" ! A.name "submit"  ! value "give me that cookie"
+  
+loginInput = input ! type_ "password" ! A.name "adminPassword" ! A.id "in_pass" ! placeholder "mot de passe"
+loginAgain = fieldset $ do
+  legend "session expiré"
+  loginInput
+
+notFound' current admin msg = notFound $ page "Introuvable" current admin $
+                              H.div ! A.id "notFound" $ toHtml msg
+
+---- CV
+        
 cv = H.div ! A.id "cv" $ do
   H.div ! class_ "contact" $ do
     a ! href (toValue cvPdf) ! class_ "button noprint" $ "version imprimable (PDF)"
