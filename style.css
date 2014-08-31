@@ -7,31 +7,157 @@ body
 {
     /* adapté de l'article d'alsacréation */
     font-family: "DejaVu Sans Light", "DejaVu Sans", Verdana, "Bitstream Vera Sans", Geneva, sans-serif;
+    margin: 0;
+    color: red;
+    color: rgb(60,60,60);
 }
 a
 {
     color: black;
+    border-bottom: 1px dashed rgba(200,200,200,1);
     text-decoration: none;
-    box-shadow: 10px 10px 0 rgba(200,200,240,0);
-    transition: box-shadow 0.1s linear;
-    padding: 1px;
+    box-shadow: 0 0 0 rgba(200,200,240,1);
+    position: relative;
+    top:  0;
+    left: 0;
+    padding: 4px 0;
+    transition: all 0.1s linear;
 }
 a:hover
 {
-    background-color: white;
-    box-shadow: 2px 2px 0 rgba(200,200,240,1);
+    top:  -4px;
+    left: -4px;
+    background-color: rgb(250,250,255);
+    box-shadow: 4px 4px 0 rgba(200,200,240,1);
+    border: none;
+}
+
+.button em
+{
+    font-style: normal;
+    font-weight: bold;
+}
+.button
+{
+    display: inline-block;
+    //margin: 5px;
+    padding: 7px 10px;
+    background-color: rgb(140,140,230);
+    color: white;
+    font-size: 110%;
+    border: none;
+
+    box-shadow: 0 0 0 rgba(140,140,230,0.6);
+    position: relative;
+    top:  0;
+    left: 0;
+    transition: all 0.1s linear 0;
+}
+.button:hover
+{
+    top:  -4px;
+    right: 4px;
+
+    background-color: rgb(140,140,230);
+    box-shadow: 4px 4px 0 rgba(140,140,230,0.6);
+}
+.button.reverse:hover
+{
+    top:  4px;
+    right: 4px;
+
+    box-shadow: 4px -4px 0 rgba(140,140,230,0.6);
+}
+
+.box
+{
+    //box-shadow: 0 0 5px rgba(100,100,100,0.4);
+border: 1px solid rgb(200,200,200);
+border-radius: 30px;
+    padding: 0;
+    position: relative;
+    width: 90%;
+    margin: auto;
+}
+
+.box h1, .box h2
+{
+    margin: 0;
+    //color: white;
+    //background-color: rgb(100,100,100);
+}
+.box h1
+{
+    padding: 10px 0 0 10px;
+    font-weight: bold;
+    font-size: 190%;
+}
+.box h2
+{
+    padding: 0 0 10px 10px;
+    font-weight: normal;
+    font-size: 110%;
+    border-bottom: 1px solid rgb(230,230,230);
+    margin-bottom: 20px;
+}
+
+.box aside, .box .content
+{
+    display: inline-block;
+    vertical-align: top;
+}
+.box .content
+{
+    width: 70%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.box .mask
+{
+    overflow: hidden;
+    border-radius: 30px;    
+}
+.box aside
+{
+    height: 0;
+    width: 30%;
+}
+.box .more
+{
+    position: absolute;
+    bottom: 0;
+}
+.box aside img
+{
+    vertical-align: top;
+    display: inline-block;
+    width: 100%;
+}
+
+.box.more .mask
+{
+    padding-bottom: 40px;
+}
+.box .more .button:first-child
+{
+    border-bottom-left-radius: 30px;
+}
+.box .more .button:last-child
+{
+    border-top-right-radius: 10px;
 }
 
 
-/***  Header & Menu ***/
+
+/***  Header, Footer, Menu ***/
 header
 {
     text-align: center;
+    margin-top: 5px;
 }
 header h1
 {
     display: inline;
-    margin: 0;
     font-size: 125%;
     font-weight: normal;
 }
@@ -42,6 +168,50 @@ header h2
     font-size: 70%;
     font-weight: normal;
 }
+header .logout
+{
+    color: white;
+    background-color: rgb(220,100,100);
+    font-weight: bold;
+    padding: 8px;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 5px;
+}
+footer
+{
+    color: rgb(110,110,110);
+    font-size: 70%;
+    margin: 100px 0 5px 0;
+    text-align: center;
+}
+footer a
+{
+    border: none;
+}
+footer ul
+{
+    list-style-type: none;
+    padding: 0;
+}
+footer li:first-child
+{
+    border-left: none;
+}
+footer li
+{
+    display: inline;
+    padding: 1px 10px;
+    border-left: 1px solid rgb(230,230,230);
+}
+footer .heart
+{
+    color: rgb(220,50,50);
+    font-style: normal;
+}
+
 
 nav
 {
@@ -54,9 +224,10 @@ nav a
     margin: 0 1px 0 0;
     padding: 0 15px;
     text-decoration: none;
-
+    position: static;
     color: rgba(0,0,0,0.4);
     border-color: rgba(0,0,0,1);
+    border-width: 0;
     transition: border-color 0.3s ease;
 }
 nav a:visited
@@ -69,13 +240,49 @@ nav a.current, nav a.current:hover
 }
 nav a:hover
 {
-    border-bottom: solid rgba(0,0,0,0.1) 2px;
+    border-bottom: solid rgba(50,50,50,0.1) 2px;
     background-color: transparent;
     box-shadow: none;
 }
 
 
-/***  Photos ***/
+
+/***  Code  ***/
+.project .desc
+{
+    margin-bottom: 20px;
+}
+.project .info
+{
+    border: 1px solid rgb(230,230,230);
+    color: rgb(100,100,100);
+    display: inline-block;
+    padding: 6px;
+    margin: 12px 12px 0 0;
+}
+.project ul.info
+{
+    list-style-type: none;
+    font-size: 80%;
+}
+.project ul.info li
+{
+    display: inline-block;
+    margin-right: 13px;
+    vertical-align: middle;
+}
+.project ul.info li:last-child
+{
+    margin-right: 0;
+}
+.project ul.info li em
+{
+    font-style: normal;
+    font-size: 130%;
+}
+
+
+/***  Photos  ***/
 body.photos
 {
     background-color: rgb(90,100,90);
@@ -102,9 +309,14 @@ body.photos nav a:hover
     /* font-family: "DejaVu Sans Light", sans-serif; */
     font-size: 80%;
 
-    max-width: 750px;
+    max-width: 21cm; /* A4 */
     margin: 0 auto;
+
+    //background-color: red;
+    padding: 7px;
 }
+#cv a
+{ border: none; }
 #cv sup
 {
     font-size: 80%;
@@ -129,18 +341,7 @@ body.photos nav a:hover
 #cv .button
 {
     float: right;
-    margin: 10px;
-    padding: 12px;
-    background-color: rgb(150,150,240);
-    color: white;
-    font-size: 120%;
-    font-weight: bold;
-    box-shadow: 0 0 0 rgba(150,150,240,0.5);
-    transition: box-shadow 0.1s linear;
-}
-#cv .button:hover
-{
-    box-shadow: 4px 4px 0 rgba(150,150,240,0.5);
+    font-size: 150%;
 }
 #cv .contact > h2, #cv .contact > h3
 {
@@ -176,8 +377,12 @@ body.photos nav a:hover
 }
 #cv .box
 {
+    width: auto;
     display: inline-block;
-    
+
+    border-radius: 0;
+    border: 1px solid rgb(220,220,220);
+
     background-color: rgb(245,245,245);
     box-shadow: 4px 4px 0px rgb(200,200,200);
     
@@ -242,6 +447,7 @@ body.photos nav a:hover
 {
     background-color: rgb(245,245,245);
     box-shadow: 4px 4px 0px rgb(200,200,200);
+    border: 1px solid rgb(220,220,220);
 }
 #cv > p
 {

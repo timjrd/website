@@ -34,8 +34,8 @@ page thetitle current admin thebody = toResponse $ docTypeHtml $ do
       h1 "timothée jourde"
       h2 "site perso"
       if admin
-        then a ! A.id "login"  ! href "/logout" $ "logout"
-        else a ! A.id "logout" ! href "/login"  $ "login"
+        then a ! A.class_ "logout" ! href "/logout" $ "logout"
+        else return ()
     
     nav $ do
       entry "/blog"   "blog"
@@ -44,6 +44,16 @@ page thetitle current admin thebody = toResponse $ docTypeHtml $ do
       entry "/cv"     "cv"
     
     toHtml thebody
+
+    footer $ ul $ do
+      li $ a ! href "" $ "à propos"
+      li $ "valide " >> (a ! href "/" $ "xhtml") >> " & " >> (a ! href "/" $ "css")
+      li $ "rand" >> (H.em ! class_ "heart" $ "<3") >> "m kiss to " >> (a ! href "" $ "someone")
+      if not admin
+        then li $ a ! A.class_ "login"  ! href "/login"  $ "login"
+        else return ()
+
+         
 
   where entry :: String -> String -> Html
         entry ref name = let e = if current == name then a ! class_ "current" else a
@@ -78,6 +88,7 @@ cv = H.div ! A.id "cv" $ do
     h2 "Timothée Jourde"
     H.div $
       ul $ do
+        li $ a ! href "" $ "agivenmail"
         li "06 79 50 56 22"
     H.div $ do
       "34 rue Paul Verlaine"

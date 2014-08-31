@@ -31,17 +31,26 @@ import qualified Data.SafeCopy as C
 import Data.ByteString (ByteString)
 import Data.Time
 import qualified Data.Map as M
+import Data.IxSet
 
-data DataBase = DataBase { projects    :: [Project']
+data DataBase = DataBase { session     :: Session
+
+                         , projects    :: [Project']
                          , projectsIds :: IdMap
-                         , session     :: Session
+
+                         , blog        :: IxSet PublishablePost
+                         , nextPostId  :: Integer
                          }
               deriving (Data, Typeable)
 
 initialDataBase = DataBase
+                  Closed
+                  
                   [demoProject']
                   M.empty
-                  Closed
+
+                  (insert demoPost empty)
+                  0
 
 ---- Session
 data Session = Session ByteString UTCTime | Closed
@@ -60,7 +69,137 @@ updateSession s = do
 
 getSession :: Query DataBase Session
 getSession = session <$> ask
-  
+
+
+
+---- Blog
+                        
+data PublishablePost = PublishedPost { postId        :: Integer
+                                     , postDate      :: UTCTime         -- publication
+                                     , postLast      :: (Maybe UTCTime) -- dernière modification
+                                     , publishedPost :: Post            -- article publié
+                                     , postDraft     :: (Maybe Post)    -- brouillon
+                                     }
+
+                     | PostDraft Integer Post
+                       
+                     deriving (Eq, Ord, Data, Typeable)
+
+data Post = Post { postTitle    :: String
+                 , postSubTitle :: String
+                 , postPreview  :: Maybe String
+                 , postCover    :: [Image]
+                 , postBody     :: String
+                 , postTags     :: [String]
+                 , postSource   :: String
+                 , postFormat   :: String
+                 }
+          deriving (Eq, Ord, Data, Typeable)
+
+data PostStatus = PostStatusDraft | PostStatusPublished
+          deriving (Eq, Ord, Data, Typeable)
+
+instance Indexable PublishablePost where
+  empty = ixSet [ ixFun $ \bp -> case bp of (PublishedPost i _ _ _ _) -> [i] --- id
+                                            (PostDraft     i _)       -> [i]
+                                            
+                , ixFun $ \bp -> case bp of (PublishedPost _ _ _ _ _) -> [PostStatusPublished] --- Status
+                                            (PostDraft     _ _)       -> [PostStatusDraft]
+                                            
+                , ixFun $ \bp -> case bp of (PublishedPost _ d _ _ _) -> [d] --- date publication
+                                            (PostDraft     _ _)       -> []
+
+                , ixFun $ \bp -> case bp of (PublishedPost _ _ _ p _) -> postTags p --- tags
+                                            (PostDraft     _ _)       -> []
+
+                ]
+
+demoPost = PublishedPost
+           0
+           (UTCTime (fromGregorian 2012 12 31) 0)
+           (Just $ UTCTime (fromGregorian 2013 01 01) 0)
+           ( Post
+             "Il est mort !"
+             "oui c'est terrible, mais c'est la vie"
+             (Just prev)
+             [ (demoImg,"bsod")
+             , (demoImg',"bsod") ]
+             bod
+             ["Informatique", "Haskell", "Programmation"]
+             bod
+             "kamoulox"
+           )
+           Nothing
+           
+  where prev = "Aujourd'hui quelqu'un est mort. Né dans un petit village, il n'est plus."
+        bod  = prev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
+
+
+blogChunk :: Int -> Int -> Query DataBase [PublishablePost]
+blogChunk todrop totake = do
+  ps <- blog <$> ask
+  return $
+    take totake $ drop todrop $ toDescList (Proxy :: Proxy UTCTime) (ps @= PostStatusPublished)
+
+getPost :: Integer -> Query DataBase (Maybe PublishablePost)
+getPost i = do
+  ps <- blog <$> ask
+  return $ getOne $ ps @= i
+
+getPostDrafts :: Query DataBase [PublishablePost]
+getPostDrafts = do
+  ps <- blog <$> ask
+  return $ toDescList (Proxy :: Proxy Integer) (ps @= PostStatusDraft)
+
+draftNewPost :: Post -> Update DataBase Integer
+draftNewPost p = do
+  db <- get
+  put $ db { blog = insert (PostDraft (nextPostId db) p) (blog db)
+           , nextPostId = (nextPostId db) + 1
+           }
+  return $ (nextPostId db) - 1
+
+publishNewPost :: Post -> UTCTime -> Update DataBase Integer
+publishNewPost p date = do
+  db <- get
+  put $ db { blog = insert (PublishedPost (nextPostId db) date Nothing p Nothing) (blog db)
+           , nextPostId = (nextPostId db) + 1
+           }
+  return $ (nextPostId db) - 1
+
+
+publishPost :: Integer -> Post -> UTCTime -> Update DataBase ()
+publishPost i p date = do
+  db <- get
+  let (Just old) = getOne $ (blog db) @= i
+      new = case old of (PublishedPost _ pub _ _ _) -> PublishedPost i pub (Just date) p Nothing
+                        (PostDraft     _ _)         -> PublishedPost i date Nothing p Nothing
+      
+  put $ db { blog = updateIx i new (blog db)
+           }
+
+draftPost :: Integer -> Post -> Update DataBase ()
+draftPost i p = do
+  db <- get
+  let (Just old) = getOne $ (blog db) @= i
+      new = case old of o@(PublishedPost _ _ _ _ _) -> o { postDraft = Just p }
+                        (PostDraft       _ _)       -> PostDraft i p
+      
+  put $ db { blog = updateIx i new (blog db)
+           }
+
+unpublishPost :: Integer -> Update DataBase ()
+unpublishPost i = do
+  db <- get
+  let (Just old) = getOne $ (blog db) @= i
+      new = case old of (PublishedPost _ _ _ p Nothing)  -> PostDraft i p
+                        (PublishedPost _ _ _ _ (Just d)) -> PostDraft i d
+                        a -> a
+      
+  put $ db { blog = updateIx i new (blog db)
+           }
+
+
 
 ---- Code (Projects)
 type IdMap = M.Map String Int
@@ -105,13 +244,14 @@ demoProject = Project
               "un des principaux dévellopeurs"
               ["Haskell","html/css"]
               ["Happstack","BlazeHtml","acid-state"]
-              [(img,"boule de crystale")
-              ,(img,"boule de crystale")]
+              [(demoImg,"bsod")
+              ,(demoImg',"bsod")]
               (Just "http://www.nyan.cat/")
               Nothing
 
   where desc = "UseleSoft est une implémentation numérique de la precrime (Minority Report), le tout étant bien sûr une arnaque (boule de cristale). Kamoulox."
-        img = "http://upload.wikimedia.org/wikipedia/commons/9/99/John_William_Waterhouse_-_The_Crystal_Ball.JPG"
+demoImg = "http://www.pc-code.com/base/numetlet/let/b/images/bsod.jpg"
+demoImg' = "http://upload.wikimedia.org/wikipedia/commons/a/ae/Windows8-BSOD.jpg"
 
 
 
@@ -220,14 +360,19 @@ editProject i = do
 
 ---- acid-states templates
 $(deriveSafeCopy 0 'C.base ''Session)
+
+$(deriveSafeCopy 0 'C.base ''Post)
+$(deriveSafeCopy 0 'C.base ''PublishablePost)
+  
 $(deriveSafeCopy 0 'C.base ''Project)
 $(deriveSafeCopy 0 'C.base ''Publishable)
 $(deriveSafeCopy 0 'C.base ''Project')
+
 $(deriveSafeCopy 0 'C.base ''DataBase)
   
 $(makeAcidic ''DataBase [ 'publishNewProject
                           , 'draftNewProject
-                        , 'publishProject
+                          , 'publishProject
                           , 'draftProject
                           , 'unpublishProject
                           , 'deleteProject
@@ -236,6 +381,15 @@ $(makeAcidic ''DataBase [ 'publishNewProject
                           , 'projectIds
                             , 'findProject
                           , 'editProject
+
+                            , 'blogChunk
+                          , 'getPost
+                            , 'getPostDrafts
+                          , 'draftNewPost
+                            , 'publishNewPost
+                          , 'publishPost
+                            , 'draftPost
+                          , 'unpublishPost
                            
                            ,'updateSession
                            ,'getSession

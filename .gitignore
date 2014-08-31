@@ -1,6 +1,14 @@
-#
-# Décrit les fichiers ignorés par git
-#
+# .gitignore
+# Haskell (ghc, cabal)
+
+# Fichiers générés (compilation/objets...)
+*.o
+*.d
+*.hi
+/Builds
+/Main
+/Hash
+/dist
 
 # Fichiers temporaires/de sauvegarde auto...
 *.autosave
@@ -13,13 +21,3 @@
 # NFS/Apache de l'IUT
 *.m2
 .nfs*
-
-# Fichiers générés (compilation/objets...)
-*.o
-*.d
-*.hi
-/Builds
-/Main
-/Hash
-/dist
-

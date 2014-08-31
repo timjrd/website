@@ -28,31 +28,33 @@ import Data.Acid
 ---- Blaze Templates
 
 projectHtml :: Project -> String -> Bool -> Html
-projectHtml p i edit = article ! A.id (toValue $ urlEncode $ i) $ do
-  h1 $ toHtml $ projectName p
-  h2 $ toHtml $ kind p
+projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ urlEncode $ i) $ do
+  H.div ! class_ "mask" $ do
+    H.div ! class_ "content"   $ do
+      h1 $ toHtml $ projectName p
+      h2 $ toHtml $ kind p
 
-  if edit then a ! href (toValue $ "/code/edit/" ++ (urlEncode i)) $ "modifier" else return ()
+      if edit then a ! href (toValue $ "/code/edit/" ++ (urlEncode i)) $ "modifier" else return ()
   
-  H.div ! class_ "main"   $ do
-    H.div  ! class_ "desc"    $ toHtml $ desc p
-    H.span ! class_ "context" $ toHtml $ context p
-    H.span ! class_ "role"    $ toHtml $ role p
-    h5 "technos"
-    ul $ do
-      forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
-      forM_ (otherTechs p) (\x -> li $ toHtml x)
+      H.div  ! class_ "desc"    $ toHtml $ desc p
+      H.span ! class_ "info"    $ toHtml $ context p
+      H.span ! class_ "info"    $ toHtml $ role p
+      br
+      ul ! class_ "info" $ do
+        forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
+        forM_ (otherTechs p) (\x -> li $ toHtml x)
       
-  aside ! class_ "images" $ forM_ (images p) (\(s,a) -> img
-                                                        ! src (toValue s)
-                                                        ! alt (toValue a)
-                                                        ! A.title (toValue a))
+    aside ! class_ "images" $ forM_ (images p) (\(s,a) -> img
+                                                          ! src (toValue s)
+                                                          ! alt (toValue a)
+                                                          ! A.title (toValue a))
 
-  case (moreDetails p) of Nothing -> return ()
-                          Just d  -> a ! href (toValue d) $ em "+ d'infos" >> " / voir les sources"
-
-  case (download p) of Nothing -> return ()
-                       Just d  -> a ! href (toValue d) $ "télécharger"
+  H.div ! class_ "more" $ do
+    case (moreDetails p) of Nothing -> return ()
+                            Just d  -> a ! class_ "reverse button" ! href (toValue d) $ em "+ d'infos" >> " / voir les sources"
+  
+    case (download p) of Nothing -> return ()
+                         Just d  -> a ! class_ "reverse button" ! href (toValue d) $ "télécharger"
 
 
 projectForm p = do
