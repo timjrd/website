@@ -8,6 +8,9 @@ import Text.Blaze.XHtml5.Attributes
 import qualified Text.Blaze.XHtml5 as H
 import qualified Text.Blaze.XHtml5.Attributes as A
 
+import Data.Time
+import Data.Time.ISO8601
+
 import Happstack.Lite
 import Happstack.Lite as Hap
 
@@ -19,8 +22,16 @@ faceImg      = "/static/face.jpg"  :: String
 cvPdf        = "/static/timothee-jourde-cv.pdf" :: String
 --imgDir = staticDir ++ "/img"
 
+
+---- Utils
 seeOther' :: String -> String -> ServerPart Response
 seeOther' url desc = seeOther url $ toResponse desc
+
+notFound' current admin msg = notFound $ page "Introuvable" current admin $
+                              H.div ! A.id "notFound" $ toHtml msg
+
+aa = a . (H.span ! class_ "pop")
+time' d = time ! datetime (toValue $ formatISO8601 d)
 
 ---- Templates
 page :: ToMarkup a => String -> String -> Bool -> a -> Response
@@ -34,7 +45,7 @@ page thetitle current admin thebody = toResponse $ docTypeHtml $ do
       h1 "timothée jourde"
       h2 "site perso"
       if admin
-        then a ! A.class_ "logout" ! href "/logout" $ "logout"
+        then aa ! A.class_ "logout" ! href "/logout" $ "logout"
         else return ()
     
     nav $ do
@@ -46,11 +57,11 @@ page thetitle current admin thebody = toResponse $ docTypeHtml $ do
     toHtml thebody
 
     footer $ ul $ do
-      li $ a ! href "" $ "à propos"
-      li $ "valide " >> (a ! href "/" $ "xhtml") >> " & " >> (a ! href "/" $ "css")
-      li $ "rand" >> (H.em ! class_ "heart" $ "<3") >> "m kiss to " >> (a ! href "" $ "someone")
+      li $ aa ! href "" $ "à propos"
+      li $ "valide " >> (aa ! href "/" $ "xhtml") >> " & " >> (aa ! href "/" $ "css")
+      li $ "rand" >> (H.em ! class_ "heart" $ "<3") >> "m kiss to " >> (aa ! href "" $ "someone")
       if not admin
-        then li $ a ! A.class_ "login"  ! href "/login"  $ "login"
+        then li $ aa ! A.class_ "login"  ! href "/login"  $ "login"
         else return ()
 
          
@@ -76,19 +87,17 @@ loginAgain = fieldset $ do
   legend "session expiré"
   loginInput
 
-notFound' current admin msg = notFound $ page "Introuvable" current admin $
-                              H.div ! A.id "notFound" $ toHtml msg
 
 ---- CV
         
 cv = H.div ! A.id "cv" $ do
   H.div ! class_ "contact" $ do
-    a ! href (toValue cvPdf) ! class_ "button noprint" $ "version imprimable (PDF)"
+    aa ! href (toValue cvPdf) ! class_ "button noprint" $ "version imprimable (PDF)"
     img ! alt "moi" ! src (toValue faceImg)
     h2 "Timothée Jourde"
     H.div $
       ul $ do
-        li $ a ! href "" $ "agivenmail"
+        li $ aa ! href "" $ "agivenmail"
         li "06 79 50 56 22"
     H.div $ do
       "34 rue Paul Verlaine"
@@ -120,7 +129,7 @@ cv = H.div ! A.id "cv" $ do
   table $ do
     caption $ do
       "quelques réalisations"
-      a ! class_ "noprint more" ! href "/code" $ " + de détails et autres projets"
+      aa ! class_ "noprint more" ! href "/code" $ " + de détails et autres projets"
         
     row [ "Jeux 2D : clone Puru Puru Digger, Guitar Hero simplifié, clone Pudding Monsters, Copter..."
         , "C++/SFML, Objective-C/Cocoa, C/SDL"

@@ -1,9 +1,10 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
 import Shared
 import Data
--- import qualified Blog
+import qualified Blog
 import qualified Code
 -- import qualified Photos
 -- import qualified CV
@@ -47,7 +48,12 @@ website datadir db = do
   if r
     then seeOther' "" "login: after POST, redirect GET"
 
-    else msum [ dir "blog"    $ ok $ page "Blog" "blog" admin ""
+    else msum [ dir "blog"    $ msum [ dir "page" $ path $ \(n :: Integer) -> echo $ "page"
+                                     , dir "post" $ path $ \(n :: Integer) -> echo $ "post"
+                                     , dir "edit" $ path $ \(n :: Integer) -> echo $ "edit"
+                                     , dir "new"  $ echo $ "new"
+                                     , echo "home"
+                                     ]
                 
               , dir "code"    $ msum [ dir "edit" $ path (\i -> msum [ Code.viewForm    (Just i) db admin
                                                                      , Code.processForm (Just i) db admin
@@ -132,3 +138,5 @@ genKey n = do
   rs <- replicateM n (genSaltIO)
   return $ concat $ map (unpack . exportSalt) rs
   
+
+echo = ok . toResponse

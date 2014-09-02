@@ -7,5 +7,5 @@ executable server
   main-is:       Main.hs
   build-depends: base, containers, text, bytestring, split, time, transformers, mtl, HTTP
                , blaze-html, happstack-lite, happstack-server, acid-state, safecopy, ixset
-               , pwstore-fast
+               , pwstore-fast, iso8601-time
 

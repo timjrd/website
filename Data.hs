@@ -135,11 +135,34 @@ demoPost = PublishedPost
         bod  = prev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
 
 
-blogChunk :: Int -> Int -> Query DataBase [PublishablePost]
-blogChunk todrop totake = do
+blogPage :: Int -> Query DataBase ([PublishablePost], Bool)
+blogPage np = do
+  all <- blog <$> ask
+  let n = np - 1
+      ps = drop (n*7) $ toDescList (Proxy :: Proxy UTCTime) (all @= PostStatusPublished)
+      (as,bs) = splitAt 7 $ ps
+      
+  return $ if length bs <= 4
+           then (ps,False)
+           else (as,True)
+
+lastsPosts :: Int -> Query DataBase [PublishablePost]
+lastsPosts n = do
   ps <- blog <$> ask
   return $
-    take totake $ drop todrop $ toDescList (Proxy :: Proxy UTCTime) (ps @= PostStatusPublished)
+    take n $ toDescList (Proxy :: Proxy UTCTime) (ps @= PostStatusPublished)
+  
+postsBefore :: Int -> UTCTime -> Query DataBase [PublishablePost]
+postsBefore n date = do
+  ps <- blog <$> ask
+  return $
+    take n $ toDescList (Proxy :: Proxy UTCTime) (ps @= PostStatusPublished @< date)
+
+postsAfter :: Int -> UTCTime -> Query DataBase [PublishablePost]
+postsAfter n date = do
+  ps <- blog <$> ask
+  return $
+    reverse $ take n $ toAscList (Proxy :: Proxy UTCTime) (ps @= PostStatusPublished @> date)
 
 getPost :: Integer -> Query DataBase (Maybe PublishablePost)
 getPost i = do
@@ -382,7 +405,10 @@ $(makeAcidic ''DataBase [ 'publishNewProject
                             , 'findProject
                           , 'editProject
 
-                            , 'blogChunk
+                            , 'blogPage
+                            , 'lastsPosts
+                              , 'postsBefore
+                              , 'postsAfter
                           , 'getPost
                             , 'getPostDrafts
                           , 'draftNewPost

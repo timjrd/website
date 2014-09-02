@@ -25,7 +25,9 @@ import Network.HTTP (urlEncode, urlDecode)
 
 import Data.Acid.Advanced   ( query', update' )
 import Data.Acid
----- Blaze Templates
+
+
+---- HTML Templates
 
 projectHtml :: Project -> String -> Bool -> Html
 projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ urlEncode $ i) $ do
@@ -34,7 +36,7 @@ projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ url
       h1 $ toHtml $ projectName p
       h2 $ toHtml $ kind p
 
-      if edit then a ! href (toValue $ "/code/edit/" ++ (urlEncode i)) $ "modifier" else return ()
+      if edit then aa ! href (toValue $ "/code/edit/" ++ (urlEncode i)) $ "modifier" else return ()
   
       H.div  ! class_ "desc"    $ toHtml $ desc p
       H.span ! class_ "info"    $ toHtml $ context p
@@ -51,10 +53,10 @@ projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ url
 
   H.div ! class_ "more" $ do
     case (moreDetails p) of Nothing -> return ()
-                            Just d  -> a ! class_ "reverse button" ! href (toValue d) $ em "+ d'infos" >> " / voir les sources"
+                            Just d  -> aa ! class_ "reverse button" ! href (toValue d) $ em "+ d'infos" >> " / voir les sources"
   
     case (download p) of Nothing -> return ()
-                         Just d  -> a ! class_ "reverse button" ! href (toValue d) $ "télécharger"
+                         Just d  -> aa ! class_ "reverse button" ! href (toValue d) $ "télécharger"
 
 
 projectForm p = do
@@ -118,6 +120,7 @@ published db admin = do
   ok $ page "Code" "code" admin $
     forM_ ps (\(Project' i (Published p _)) -> projectHtml p i admin)
 
+
 viewForm :: (Maybe String) -> (AcidState DataBase) -> Bool -> ServerPart Response
 viewForm id_ db admin = do
   Hap.method GET
@@ -175,8 +178,6 @@ readForm = do
     (ifNotBlank _more)
     (ifNotBlank _download)
 
-
-  
 
 
 toBool a = case a of Nothing -> False
