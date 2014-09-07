@@ -179,9 +179,6 @@ readForm = do
     (ifNotBlank _download)
 
 
-
-toBool a = case a of Nothing -> False
-                     Just _  -> True
 readListWith d = filter (/="") . fmap (unwords . words) . splitOn d
 ifNotBlank s = if all (isSpace) s then Nothing else Just s
 

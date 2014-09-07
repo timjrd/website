@@ -50,9 +50,11 @@ website datadir db = do
 
     else msum [ dir "blog"    $ msum [ dir "page" $ path $ \(n :: Integer) -> echo $ "page"
                                      , dir "post" $ path $ \(n :: Integer) -> echo $ "post"
-                                     , dir "edit" $ path $ \(n :: Integer) -> echo $ "edit"
+                                     , dir "edit" $ path $ \i -> msum [ Blog.viewForm    i db admin
+                                                                      , Blog.processForm i db admin
+                                                                      ]
                                      , dir "new"  $ echo $ "new"
-                                     , echo "home"
+                                     , Blog.lasts db admin
                                      ]
                 
               , dir "code"    $ msum [ dir "edit" $ path (\i -> msum [ Code.viewForm    (Just i) db admin
@@ -69,7 +71,8 @@ website datadir db = do
               , dir "static"  $ serveStatic (datadir ++ staticDir)
               , dir "login"   $ ok $ loginPage "/"
               , dir "logout"  $ (update' db CloseSession) >> (ok $ page "" "" False "")
-              , ok $ page "Blog" "blog" admin ""
+
+              , Blog.lasts db admin
               ]
   
 

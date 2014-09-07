@@ -24,6 +24,13 @@ cvPdf        = "/static/timothee-jourde-cv.pdf" :: String
 
 
 ---- Utils
+x <$< f = fmap f x
+mToHtml x = toHtml $ case x of (Just a) -> a
+                               Nothing  -> return ()
+
+toBool a = case a of Nothing -> False
+                     Just _  -> True
+
 seeOther' :: String -> String -> ServerPart Response
 seeOther' url desc = seeOther url $ toResponse desc
 

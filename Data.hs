@@ -49,7 +49,7 @@ initialDataBase = DataBase
                   [demoProject']
                   M.empty
 
-                  (insert demoPost empty)
+                  (insert demoPost' $ insert demoPost empty)
                   0
 
 ---- Session
@@ -114,6 +114,7 @@ instance Indexable PublishablePost where
 
                 ]
 
+
 demoPost = PublishedPost
            0
            (UTCTime (fromGregorian 2012 12 31) 0)
@@ -121,18 +122,35 @@ demoPost = PublishedPost
            ( Post
              "Il est mort !"
              "oui c'est terrible, mais c'est la vie"
-             (Just prev)
+             (Just demoPrev)
              [ (demoImg,"bsod")
              , (demoImg',"bsod") ]
-             bod
+             demoBod
              ["Informatique", "Haskell", "Programmation"]
-             bod
+             demoBod
+             "kamoulox"
+           )
+           Nothing
+
+demoPost' = PublishedPost
+           1
+           (UTCTime (fromGregorian 2014 12 31) 0)
+           (Just $ UTCTime (fromGregorian 2015 02 03) 0)
+           ( Post
+             "Il est re-vivant !"
+             "oui c'est terrible, mais c'est la vie"
+             (Just demoPrev)
+             [ (demoImg,"bsod")
+             , (demoImg',"bsod") ]
+             demoBod
+             ["Informatique", "Haskell", "Programmation"]
+             demoBod
              "kamoulox"
            )
            Nothing
            
-  where prev = "Aujourd'hui quelqu'un est mort. Né dans un petit village, il n'est plus."
-        bod  = prev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
+demoPrev = "Aujourd'hui quelqu'un est mort. Né dans un petit village, il n'est plus."
+demoBod  = demoPrev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
 
 
 blogPage :: Int -> Query DataBase ([PublishablePost], Bool)
