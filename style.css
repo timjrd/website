@@ -8,28 +8,29 @@ body
     /* adapté de l'article d'alsacréation */
     font-family: "DejaVu Sans Light", "DejaVu Sans", Verdana, "Bitstream Vera Sans", Geneva, sans-serif;
     margin: 0;
-    color: red;
-    color: rgb(60,60,60);
+    color: rgb(50,50,50);
 }
 a
 {
     color: black;
     border-bottom: 1px dashed rgba(200,200,200,1);
     text-decoration: none;
+    //padding: 4px 0;
+}
+a > .pop
+{
     box-shadow: 0 0 0 rgba(200,200,240,1);
     position: relative;
     top:  0;
     left: 0;
-    padding: 4px 0;
     transition: all 0.1s linear;
 }
-a:hover
+a:hover > .pop
 {
     top:  -4px;
     left: -4px;
     background-color: rgb(250,250,255);
     box-shadow: 4px 4px 0 rgba(200,200,240,1);
-    border: none;
 }
 
 .button em
@@ -40,20 +41,22 @@ a:hover
 .button
 {
     display: inline-block;
-    //margin: 5px;
-    padding: 7px 10px;
-    background-color: rgb(140,140,230);
     color: white;
     font-size: 110%;
     border: none;
-
+}
+.button > .pop
+{
+    display: block;
+    background-color: rgb(140,140,230);
+    padding: 7px 10px;
     box-shadow: 0 0 0 rgba(140,140,230,0.6);
     position: relative;
     top:  0;
     left: 0;
-    transition: all 0.1s linear 0;
+    transition: all 0.1s linear;
 }
-.button:hover
+.button:hover > .pop
 {
     top:  -4px;
     right: 4px;
@@ -61,7 +64,7 @@ a:hover
     background-color: rgb(140,140,230);
     box-shadow: 4px 4px 0 rgba(140,140,230,0.6);
 }
-.button.reverse:hover
+.button.reverse:hover > .pop
 {
     top:  4px;
     right: 4px;
@@ -71,35 +74,36 @@ a:hover
 
 .box
 {
-    border: 1px solid rgb(200,200,200);
+    border: 1px solid rgb(220,220,220);
     border-radius: 30px;
     padding: 0;
     position: relative;
     z-index: 10;
     background-color: white;
-    width: 90%;
-    margin: auto;
 }
 
 .box h1, .box h2
 {
     margin: 0;
-    //color: white;
-    //background-color: rgb(100,100,100);
+}
+.box h1 a, .box h2 a
+{
+    border: none;
+    color: inherit;
 }
 .box h1
 {
-    padding: 10px 0 0 10px;
+    padding: 15px 0 0 15px;
     font-weight: bold;
-    font-size: 190%;
+    font-size: 160%;
 }
 .box h2
 {
-    padding: 0 0 10px 10px;
+    padding: 0 0 15px 15px;
     font-weight: normal;
     font-size: 110%;
-    border-bottom: 1px solid rgb(230,230,230);
-    margin-bottom: 20px;
+    border-bottom: 1px solid rgb(240,240,240);
+    margin-bottom: 25px;
 }
 
 .box aside, .box .content
@@ -139,11 +143,11 @@ a:hover
 {
     padding-bottom: 40px;
 }
-.box .more .button:first-child
+.box .more .button:first-child > .pop
 {
     border-bottom-left-radius: 30px;
 }
-.box .more .button:last-child
+.box .more .button:last-child > .pop
 {
     border-top-right-radius: 10px;
 }
@@ -154,7 +158,7 @@ a:hover
 header
 {
     text-align: center;
-    margin-top: 5px;
+    margin-top: 10px;
 }
 header h1
 {
@@ -218,7 +222,7 @@ nav
 {
     text-align: center;
     font-size: 170%;
-    margin: 0 0 50px 0;
+    margin: 0 0 60px 0;
 }
 nav a
 {
@@ -249,6 +253,11 @@ nav a:hover
 
 
 /***  Code  ***/
+.project
+{
+    width: 80%;
+    margin: auto;
+}
 .project .desc
 {
     margin-bottom: 20px;
@@ -285,39 +294,58 @@ nav a:hover
 /***  Blog  ***/
 .post.preview
 {
+    width: 80%;
+    margin: auto;
+}
+.post.preview .header
+{
+    position: relative;
+    text-align: right;
 }
 .post.preview .tags
 {
-    display: inline-block;
-    height: 0;
-    
+    font-size: 70%;
+    width: 40%;
+    position: absolute;
+    right: 30px;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
 }
 .post.preview .tags li
 {
-    display: inline;
+    display: inline-block;
+    margin-left: 10px;
 }
 .thread.deco
 {
     position: relative;
     z-index: 2;
     width: 1px;
-    border-left: 4px solid rgb(230,230,230);
-    border-right: 4px solid rgb(230,230,230);
+    border-left: 4px solid rgb(220,220,220);
+    border-right: 4px solid rgb(220,220,220);
+    vertical-align: top;
 }
-.post.preview > .thread.deco
+.post.preview:first-of-type .thread.deco
 {
-    height: 90px;
-    margin-left: 50%;
+    height: 50px;
+}
+.post.preview .thread.deco
+{
+    display: inline-block;
+    height: 80px;
+    margin-right: 50%;
 }
 .post.preview .date
 {
     position: relative;
     z-index: 1;
-    border-left: 9px solid rgb(230,230,230);
-    padding: 5px 0 5px 3px;
+    border-right: 9px solid rgb(220,220,220);
+    padding: 5px 3px 5px 0;
     vertical-align: top;
     display: inline-block;
-    margin-left: 50%;
+    margin-right: 50%;
     font-size: 80%;
     color: rgb(90,90,90);
 }
@@ -329,6 +357,29 @@ nav a:hover
 .post.preview .date time
 {
 }
+.post.preview .read-more
+{
+    display: block;
+    color: rgb(100,100,100);
+    padding: 20px 10px 10px 15px;
+    border: none;
+    font-size: 80%;
+}
+.post.preview .read-more span
+{
+    display: inline-block;
+    height: 15px;
+    width: 15px;
+    background-color: rgb(100,100,100);
+    border-radius: 15px;
+    margin-right: 4px;
+}
+.post.preview .read-more span:nth-child(1) { transition: margin 0.3s ease-in-out 0.1s; }
+.post.preview .read-more span:nth-child(2) { transition: margin 0.2s ease-in-out; }
+.post.preview .read-more:hover span { margin-right: 30px; }
+.post.preview .read-more:hover span:last-child { margin-right: 4px; }
+
+
 
 /***  Photos  ***/
 body.photos

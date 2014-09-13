@@ -49,7 +49,7 @@ initialDataBase = DataBase
                   [demoProject']
                   M.empty
 
-                  (insert demoPost' $ insert demoPost empty)
+                  (insert demoPost' $ insert demoPost'' empty)
                   0
 
 ---- Session
@@ -115,43 +115,34 @@ instance Indexable PublishablePost where
                 ]
 
 
-demoPost = PublishedPost
-           0
-           (UTCTime (fromGregorian 2012 12 31) 0)
-           (Just $ UTCTime (fromGregorian 2013 01 01) 0)
-           ( Post
-             "Il est mort !"
-             "oui c'est terrible, mais c'est la vie"
-             (Just demoPrev)
-             [ (demoImg,"bsod")
-             , (demoImg',"bsod") ]
-             demoBod
-             ["Informatique", "Haskell", "Programmation"]
-             demoBod
-             "kamoulox"
-           )
-           Nothing
 
 demoPost' = PublishedPost
-           1
-           (UTCTime (fromGregorian 2014 12 31) 0)
-           (Just $ UTCTime (fromGregorian 2015 02 03) 0)
-           ( Post
-             "Il est re-vivant !"
-             "oui c'est terrible, mais c'est la vie"
-             (Just demoPrev)
-             [ (demoImg,"bsod")
-             , (demoImg',"bsod") ]
-             demoBod
-             ["Informatique", "Haskell", "Programmation"]
-             demoBod
-             "kamoulox"
-           )
-           Nothing
+            0
+            (UTCTime (fromGregorian 2012 12 31) 0)
+            (Just $ UTCTime (fromGregorian 2013 01 01) 0)
+            demoPost
+            Nothing
+
+demoPost'' = PublishedPost
+             1
+             (UTCTime (fromGregorian 2014 12 31) 0)
+             (Just $ UTCTime (fromGregorian 2015 02 03) 0)
+             demoPost
+             Nothing
            
 demoPrev = "Aujourd'hui quelqu'un est mort. Né dans un petit village, il n'est plus."
 demoBod  = demoPrev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
 
+demoPost = Post
+           "Il est re-vivant !"
+           "oui c'est terrible, mais c'est la vie"
+           (Just demoPrev)
+           [ (demoImg,"bsod")
+           , (demoImg',"bsod") ]
+           demoBod
+           ["Informatique", "Haskell", "Programmation"]
+           demoBod
+           "kamoulox"
 
 blogPage :: Int -> Query DataBase ([PublishablePost], Bool)
 blogPage np = do
@@ -185,7 +176,7 @@ postsAfter n date = do
 getPost :: Integer -> Query DataBase (Maybe PublishablePost)
 getPost i = do
   ps <- blog <$> ask
-  return $ getOne $ ps @= i
+  return $ getOne $ ps @= PostStatusPublished @= i
 
 getPostDrafts :: Query DataBase [PublishablePost]
 getPostDrafts = do
@@ -201,25 +192,26 @@ draftNewPost p = do
   return $ (nextPostId db) - 1
 
 publishNewPost :: Post -> UTCTime -> Update DataBase Integer
-publishNewPost p date = do
+publishNewPost p ct = do
   db <- get
-  put $ db { blog = insert (PublishedPost (nextPostId db) date Nothing p Nothing) (blog db)
+  put $ db { blog = insert (PublishedPost (nextPostId db) ct Nothing p Nothing) (blog db)
            , nextPostId = (nextPostId db) + 1
            }
   return $ (nextPostId db) - 1
 
 
-publishPost :: Integer -> Post -> UTCTime -> Update DataBase ()
-publishPost i p date = do
+publishPost :: Integer -> Post -> UTCTime -> Update DataBase Integer
+publishPost i p ct = do
   db <- get
   let (Just old) = getOne $ (blog db) @= i
-      new = case old of (PublishedPost _ pub _ _ _) -> PublishedPost i pub (Just date) p Nothing
-                        (PostDraft     _ _)         -> PublishedPost i date Nothing p Nothing
+      new = case old of (PublishedPost _ pub _ _ _) -> PublishedPost i pub (Just ct) p Nothing
+                        (PostDraft     _ _)         -> PublishedPost i ct Nothing p Nothing
       
   put $ db { blog = updateIx i new (blog db)
            }
+  return i
 
-draftPost :: Integer -> Post -> Update DataBase ()
+draftPost :: Integer -> Post -> Update DataBase Integer
 draftPost i p = do
   db <- get
   let (Just old) = getOne $ (blog db) @= i
@@ -228,6 +220,7 @@ draftPost i p = do
       
   put $ db { blog = updateIx i new (blog db)
            }
+  return i
 
 unpublishPost :: Integer -> Update DataBase ()
 unpublishPost i = do

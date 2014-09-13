@@ -48,12 +48,14 @@ website datadir db = do
   if r
     then seeOther' "" "login: after POST, redirect GET"
 
-    else msum [ dir "blog"    $ msum [ dir "page" $ path $ \(n :: Integer) -> echo $ "page"
-                                     , dir "post" $ path $ \(n :: Integer) -> echo $ "post"
-                                     , dir "edit" $ path $ \i -> msum [ Blog.viewForm    i db admin
-                                                                      , Blog.processForm i db admin
+    else msum [ dir "blog"    $ msum [ dir "page" $ path $ \(i :: Integer) -> echo $ "page"
+                                     , dir "post" $ path $ \i -> Blog.viewPost i db admin
+                                     , dir "edit" $ path $ \i -> msum [ Blog.viewForm    (Just i) db admin
+                                                                      , Blog.processForm (Just i) db admin
                                                                       ]
-                                     , dir "new"  $ echo $ "new"
+                                     , dir "new"  $ msum [ Blog.viewForm    Nothing db admin
+                                                         , Blog.processForm Nothing db admin
+                                                         ]
                                      , Blog.lasts db admin
                                      ]
                 

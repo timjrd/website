@@ -127,18 +127,18 @@ viewForm id_ db admin = do
   if not admin
     then unauthorized $ loginPage ""
             
-    else case id_ of Nothing  -> ok $ page "Nouveau projet" "code" admin (projectForm demoProject)
+    else case id_ of Nothing  -> ok $ page "Édition" "code" admin (projectForm demoProject)
                      (Just i) -> do
                        pr <- query' db (EditProject i)
                        case pr of Nothing  -> notFound' "code" admin ("404 :)" :: String)
-                                  (Just p) -> ok $ page ("Édition de " ++ i) "code" admin (projectForm p)
+                                  (Just p) -> ok $ page "Édition" "code" admin (projectForm p)
 
 processForm id_ db admin = do
   Hap.method POST
   publish <- toBool <$> (optional $ lookText "publish")
   p <- readForm
   if not admin
-    then unauthorized $ page "session expiré" "code" admin (projectFormLogin p)
+    then unauthorized $ page "Édition" "code" admin (projectFormLogin p)
                  
     else if publish
          then do i <- case id_ of Nothing  -> update' db $ PublishNewProject 0 p

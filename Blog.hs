@@ -10,6 +10,8 @@ import Data
 import Control.Applicative ((<$>), optional)
 import Control.Monad
 import Control.Monad.State
+import Control.Monad.Writer
+import qualified Control.Monad.Writer as Mo
 import Control.Monad.IO.Class
 import Text.Pandoc
 import qualified Text.Pandoc.Walk as Doc
@@ -28,6 +30,7 @@ import System.Locale
 
 import Happstack.Lite
 import qualified Happstack.Lite as Hap
+import qualified Happstack.Server.Response as Hap
 import Network.HTTP (urlEncode, urlDecode)
 
 import Data.Acid.Advanced   ( query', update' )
@@ -88,6 +91,19 @@ timeLocale_FR = TimeLocale {
   }
                              
 
+viewPost i db admin = do
+  mp <- query' db (GetPost i)
+  ct <- liftIO $ getCurrentTime
+  case mp of
+    Nothing  -> notFound' "blog" admin ("404 :)" :: String)
+    (Just (PublishedPost _ pub last p _)) ->
+      ok $ page "Blog" "blog" admin $
+      postHtml p
+      (showMDate ct $ Just pub)
+      (showMDate ct last)
+      admin
+      
+
 lasts db admin = do
   p <- viewBlogPage' 1 db admin
   ok $ page "Blog" "blog" admin $ p
@@ -114,51 +130,71 @@ viewBlogPage' n db admin = do
 
 
 
-viewForm i db admin = do
+viewForm mi db admin = do
   Hap.method GET
   if not admin then (unauthorized $ loginPage "") else do
-    p'' <- query' db (GetPost i)
-    case p'' of
-      Nothing   -> notFound' "code" admin ("404 :)" :: String)
-      (Just p') -> do
-        let (p,pub,last) = case p' of (PublishedPost _ pub last p Nothing)  -> (p,(Just pub),last)
-                                      (PublishedPost _ pub last _ (Just p)) -> (p,(Just pub),last)
-                                      (PostDraft     _ p)                   -> (p,Nothing,Nothing)
+    case mi of
+      Nothing -> ok $ page "Édition" "blog" admin $ postForm demoPost 0 Nothing Nothing
+      (Just i) -> do
+        p'' <- query' db (GetPost i)
+        case p'' of
+          Nothing   -> notFound' "blog" admin ("404 :)" :: String)
+          (Just p') -> do
+            let (p,pub,last) = case p' of (PublishedPost _ pub last p Nothing)  -> (p,(Just pub),last)
+                                          (PublishedPost _ pub last _ (Just p)) -> (p,(Just pub),last)
+                                          (PostDraft     _ p)                   -> (p,Nothing,Nothing)
 
-        ct <- liftIO $ getCurrentTime
-        ok $ page "Édition" "code" admin $ postForm p i (showMDate ct pub) (showMDate ct last)
+            ct <- liftIO $ getCurrentTime
+            ok $ page "Édition" "blog" admin $ postForm p i (showMDate ct pub) (showMDate ct last)
   
   
-processForm i db admin = do
+processForm mi db admin = do
   Hap.method POST
   ct <- liftIO $ getCurrentTime
-  p <- readForm
-  ok $ page "VIEW FORM (test)" "blog" admin $
-    postPreviewHtml p i
-    (Just (ct, "NO date"))
-    (Just (ct, "NO date"))
-    False
+  publish <- toBool <$> (optional $ lookText "publish")
+  (p,err) <- runWriter <$> readForm
+  case err of
+    (_:_) -> Hap.badRequest $ page "Édition" "blog" admin (postForm p 0 Nothing Nothing)
+    []    -> 
+      if not admin
+      then unauthorized $ page "Édition" "blog" admin (postFormLogin p 0 Nothing Nothing)
+      else if publish
+           then do i <- case mi of Nothing  -> update' db $ PublishNewPost p ct
+                                   (Just i) -> update' db $ PublishPost i p ct
+                   seeOther' ("/blog/post/" ++ (show i)) "publish: after POST, redirect GET"
+                
+           else do i <- case mi of Nothing  -> update' db $ DraftNewPost p
+                                   (Just i) -> update' db $ DraftPost i p
+                   seeOther' ("/blog/edit/" ++ (show i)) "save draft: after POST, redirect GET"
+
+
     
 
+readForm :: ServerPart (Mo.Writer [String] Post)
 readForm = do
   doc'   <- unpack <$> lookText "content"
   format <- unpack <$> lookText "format"
   let doc     = readOrg def $ filter (/='\r') doc'
-      [t,st]  = take 2 $ extractHeaders doc
       cover   = take 4 $ extractImages doc
       body'   = extractBody doc
       preview = writeHtmlString def {writerHtml5=True} <$> extractPreview body'
       body    = writeHtmlString def {writerHtml5=True} body'
+      titles  = case take 2 $ extractHeaders doc of []    -> tell ["titre manquant"] >> return ("sans titre","")
+                                                    [a]   -> return (a,"")
+                                                    [a,b] -> return (a,b)
 
-  return $ Post
-    t
-    st
-    preview
-    cover
-    body
-    []
-    doc'
-    "NO format"
+  
+  return $ do
+    (t,st) <- titles
+    return $ Post
+      t
+      st
+      preview
+      cover
+      body
+      []
+      doc'
+      "NO format"
 
 
 ---- Pandoc
@@ -257,11 +293,12 @@ postHtml p pub last edit = article ! class_ "post" $ do
 
 postPreviewHtml :: Post -> Integer -> (Maybe (UTCTime,String)) -> (Maybe (UTCTime,String)) -> Bool -> Html
 postPreviewHtml p i pub last edit = article ! class_ "post preview" ! A.id (toValue i) $ do
-  H.div ! class_ "thread deco" $ ""
-  dateHtml pub last
+  H.div ! class_ "header" $ do
+    H.div ! class_ "thread deco" $ ""
+    dateHtml pub last
 
-  case (postTags p) of [] -> return ()
-                       ts -> ul ! class_ "tags" $ forM_ ts (li . toHtml)
+    case (postTags p) of [] -> return ()
+                         ts -> ul ! class_ "tags" $ forM_ ts (li . toHtml)
                        
   H.div ! class_ "box" $ do
     H.div ! class_ "mask" $ do
@@ -279,7 +316,11 @@ postPreviewHtml p i pub last edit = article ! class_ "post preview" ! A.id (toVa
                                                                 ! alt (toValue a)
                                                                 ! A.title (toValue a)
 
-      case (postPreview p) of (Just _) -> a ! href (toValue $ "/blog/post/" ++ (show i)) $ em "..." >> "lire la suite"
+      case (postPreview p) of (Just _) -> a
+                                          ! class_ "read-more"
+                                          ! href (toValue $ "/blog/post/" ++ (show i)) $
+                                          let dot = (H.span "") in dot >> dot >> dot >> "lire la suite"
+                                          
                               Nothing  -> return ()
   
   

@@ -66,7 +66,7 @@ page thetitle current admin thebody = toResponse $ docTypeHtml $ do
     footer $ ul $ do
       li $ aa ! href "" $ "à propos"
       li $ "valide " >> (aa ! href "/" $ "xhtml") >> " & " >> (aa ! href "/" $ "css")
-      li $ "rand" >> (H.em ! class_ "heart" $ "<3") >> "m kiss to " >> (aa ! href "" $ "someone")
+      li $ "random kiss to " >> (aa ! href "" $ "someone")
       if not admin
         then li $ aa ! A.class_ "login"  ! href "/login"  $ "login"
         else return ()
