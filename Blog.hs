@@ -263,13 +263,12 @@ prev ref = H.div ! class_ "prev" $ do
   a ! href (toValue $ ref) $ "articles précédents"
 
 
-dateHtml pub last = let lastHtml = last <$< \(u,d) -> do "modifié " ; (time' u) $ toHtml d
+dateHtml pub last = let lastHtml = last <$< \(u,d) -> H.span $ do " modifié " ; (time' u) $ toHtml d
                         pubHtml  = pub  <$< \(u,d) -> H.em $ do "publié " ; (time' u) ! pubdate "" $ toHtml d
 
                     in if last == Nothing && pub == Nothing then return () else do
                       H.div ! class_ "date" $ do
                         mToHtml pubHtml
-                        br
                         mToHtml lastHtml
 
   
@@ -277,12 +276,13 @@ dateHtml pub last = let lastHtml = last <$< \(u,d) -> do "modifié " ; (time' u)
     
 postHtml :: Post -> (Maybe (UTCTime,String)) -> (Maybe (UTCTime,String)) -> Bool -> Html
 postHtml p pub last edit = article ! class_ "post" $ do
-  h1 $ a ! href (toValue $ "/blog/post/" ++ (show i)) $ toHtml $ postTitle p
-  h2 $ toHtml $ postSubTitle p
-  dateHtml pub last
-  
-  case (postTags p) of [] -> return ()
-                       ts -> ul ! class_ "tags" $ forM_ ts (li . toHtml)
+  H.div ! class_ "header" $ do
+    h1 $ a ! href (toValue $ "/blog/post/" ++ (show i)) $ toHtml $ postTitle p
+    h2 $ toHtml $ postSubTitle p
+
+    dateHtml pub last
+    case (postTags p) of [] -> return ()
+                         ts -> ul ! class_ "tags" $ forM_ ts (li . toHtml)
 
 
   if edit then aa ! href (toValue $ "/blog/edit/" ++ (show i)) $ "modifier" else return ()
@@ -292,7 +292,7 @@ postHtml p pub last edit = article ! class_ "post" $ do
 
 
 postPreviewHtml :: Post -> Integer -> (Maybe (UTCTime,String)) -> (Maybe (UTCTime,String)) -> Bool -> Html
-postPreviewHtml p i pub last edit = article ! class_ "post preview" ! A.id (toValue i) $ do
+postPreviewHtml p i pub last edit = article ! class_ "post-preview" ! A.id (toValue i) $ do
   H.div ! class_ "header" $ do
     H.div ! class_ "thread deco" $ ""
     dateHtml pub last

@@ -10,6 +10,7 @@ body
     margin: 0;
     color: rgb(50,50,50);
 }
+
 a
 {
     color: black;
@@ -17,6 +18,12 @@ a
     text-decoration: none;
     //padding: 4px 0;
 }
+h1 a, h2 a
+{
+    border: none;
+    color: inherit;
+}
+
 a > .pop
 {
     box-shadow: 0 0 0 rgba(200,200,240,1);
@@ -85,11 +92,6 @@ a:hover > .pop
 .box h1, .box h2
 {
     margin: 0;
-}
-.box h1 a, .box h2 a
-{
-    border: none;
-    color: inherit;
 }
 .box h1
 {
@@ -255,7 +257,7 @@ nav a:hover
 /***  Code  ***/
 .project
 {
-    width: 80%;
+    max-width: 27cm;
     margin: auto;
 }
 .project .desc
@@ -291,32 +293,57 @@ nav a:hover
     font-size: 130%;
 }
 
+
 /***  Blog  ***/
-.post.preview
+.tags
 {
-    width: 80%;
+    font-size: 70%;
+    list-style-type: none;
+    padding: 0;
+}
+.tags li
+{
+    display: inline-block;
+    margin: 0 3px;
+}
+
+.date
+{
+    font-size: 80%;
+    color: rgb(90,90,90);
+}
+.date em
+{
+    font-size: 112%;
+    font-style: normal;
+}
+.date time
+{}
+
+
+
+
+.post-preview
+{
+    max-width: 27cm;
     margin: auto;
 }
-.post.preview .header
+.post-preview .box
+{
+    box-shadow: 4px 4px 0 rgb(210,210,210);
+}
+.post-preview .header
 {
     position: relative;
     text-align: right;
 }
-.post.preview .tags
+.post-preview .tags
 {
-    font-size: 70%;
     width: 40%;
     position: absolute;
     right: 30px;
     bottom: 0;
     margin: 0;
-    padding: 0;
-    list-style-type: none;
-}
-.post.preview .tags li
-{
-    display: inline-block;
-    margin-left: 10px;
 }
 .thread.deco
 {
@@ -327,17 +354,18 @@ nav a:hover
     border-right: 4px solid rgb(220,220,220);
     vertical-align: top;
 }
-.post.preview:first-of-type .thread.deco
+.post-preview:first-of-type .thread.deco
 {
     height: 50px;
 }
-.post.preview .thread.deco
+.post-preview .thread.deco
 {
     display: inline-block;
     height: 80px;
     margin-right: 50%;
 }
-.post.preview .date
+
+.post-preview .date
 {
     position: relative;
     z-index: 1;
@@ -346,18 +374,13 @@ nav a:hover
     vertical-align: top;
     display: inline-block;
     margin-right: 50%;
-    font-size: 80%;
-    color: rgb(90,90,90);
 }
-.post.preview .date em
+.post-preview .date em
 {
-    font-size: 112%;
-    font-style: normal;
+    display: block;
 }
-.post.preview .date time
-{
-}
-.post.preview .read-more
+
+.post-preview .read-more
 {
     display: block;
     color: rgb(100,100,100);
@@ -365,7 +388,7 @@ nav a:hover
     border: none;
     font-size: 80%;
 }
-.post.preview .read-more span
+.post-preview .read-more span
 {
     display: inline-block;
     height: 15px;
@@ -374,12 +397,62 @@ nav a:hover
     border-radius: 15px;
     margin-right: 4px;
 }
-.post.preview .read-more span:nth-child(1) { transition: margin 0.3s ease-in-out 0.1s; }
-.post.preview .read-more span:nth-child(2) { transition: margin 0.2s ease-in-out; }
-.post.preview .read-more:hover span { margin-right: 30px; }
-.post.preview .read-more:hover span:last-child { margin-right: 4px; }
+.post-preview .read-more span:nth-child(1) { transition: margin 0.3s ease-in-out 0.1s; }
+.post-preview .read-more span:nth-child(2) { transition: margin 0.2s ease-in-out; }
+.post-preview .read-more:hover span { margin-right: 30px; }
+.post-preview .read-more:hover span:last-child { margin-right: 4px; }
 
+.post
+{
+    max-width: 32cm;
+    margin: auto;
+}
+.post h1, .post h2
+{
+    padding: 0;
+    margin: 0;
+}
+.post h1
+{
+    font-size: 260%;
+}
+.post h2
+{
+    font-size: 150%;
+    font-weight: normal;
+    margin-bottom: 25px;
+}
 
+.post .date
+{
+    display: inline-block;
+}
+.post .date em, .post .date span, .post .tags
+{
+    color: rgb(190,190,190);
+    display: inline-block;
+    margin-right: 17px;
+}
+.post .tags
+{
+    margin: 0 0 0 -3px;
+}
+
+.post .header
+{
+    //box-shadow: 0 -5px 30px rgba(0,0,0,0.1), 0 -5px 6px rgba(0,0,0,0.09), 0 -8px 0 rgb(170,170,170);
+    //border-top: 2px solid rgb(200,200,200);
+    border-radius: 10px;
+    padding: 15px;
+    color: white;
+    background-color: rgb(90,90,90);
+    box-shadow: 4px 4px 0 rgb(160,160,160);
+    margin-bottom: 25px;
+}
+.post .body
+{
+    padding: 15px;
+}
 
 /***  Photos  ***/
 body.photos

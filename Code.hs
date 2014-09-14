@@ -38,7 +38,7 @@ projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ url
 
       if edit then aa ! href (toValue $ "/code/edit/" ++ (urlEncode i)) $ "modifier" else return ()
   
-      H.div  ! class_ "desc"    $ toHtml $ desc p
+      H.div  ! class_ "body"    $ toHtml $ desc p
       H.span ! class_ "info"    $ toHtml $ context p
       H.span ! class_ "info"    $ toHtml $ role p
       br
