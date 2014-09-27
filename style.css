@@ -9,7 +9,6 @@ body
     font-family: "DejaVu Sans Light", "DejaVu Sans", Verdana, "Bitstream Vera Sans", Geneva, sans-serif;
     margin: 0;
     color: rgb(45,45,45);
-    //background-color: rgb(251,251,251);
     background-image: url(/static/bg.png); /* site de kde */
     background-repeat: repeat;
 }
@@ -17,9 +16,7 @@ body
 a
 {
     color: black;
-    //border-bottom: 1px dashed rgba(200,200,200,1);
     text-decoration: none;
-    //padding: 4px 0;
 }
 h1 a, h2 a
 {
@@ -36,7 +33,6 @@ a > .pop
     left: 0;
     transition: all 0.1s linear;
     background-color: rgb(230,230,255);
-
 }
 a:hover > .pop
 {
@@ -52,6 +48,16 @@ hr
     border: none;
     border-bottom: 1px solid rgb(230,230,230);
 }
+
+ul
+{
+    list-style-type: square;
+}
+li
+{
+    padding: 2px 0;
+}
+
 
 table
 {
@@ -86,6 +92,7 @@ thead td
     border: none;
     background-color: rgb(70,70,70);
 }
+
 
 .button em
 {
@@ -293,7 +300,6 @@ nav a:visited
 { color: inherit; }
 nav a.current, nav a.current:hover
 {
-    //font-weight: bold;
     color: black;
     border-bottom: solid black 2px;
 }
@@ -492,11 +498,8 @@ nav a:hover
 
 .post div.header
 {
-    //box-shadow: 0 -5px 30px rgba(0,0,0,0.1), 0 -5px 6px rgba(0,0,0,0.09), 0 -8px 0 rgb(170,170,170);
-    //border-top: 2px solid rgb(200,200,200);
     border-radius: 15px;
     padding: 15px 15px 10px 15px;
-    //color: white;
     background-color: white;
     border: 1px solid rgb(220,220,220);
     box-shadow: 0 4px 0 rgb(160,160,160);
@@ -522,28 +525,29 @@ nav a:hover
 }
 .post .body h4
 {
-    margin: 40px 0 10px 0;
+    margin: 30px 0 15px 0;
     font-size: 150%;
     font-weight: bold;
+    padding: 0 20px;
 
     display: inline-block;
-    border-bottom: 5px solid rgb(230,230,230);
+    border-bottom: 1px solid rgb(220,220,220);
 }
 .post .body h5
 {
-    margin: 40px 0 10px 0;
+    margin: 30px 0 10px 0;
     font-size: 110%;
     font-weight: bold;
     font-style: italic;
-    padding-left: 40px;
+    padding-left: 20px;
 }
 .post .body h6
 {
-    margin: 30px 0 10px 0;
+    margin: 25px 0 10px 0;
     font-size: 100%;
     font-weight: bold;
     font-style: italic;
-    padding-left: 70px;
+    padding-left: 30px;
     color: rgb(90,90,90);
 }
 
@@ -555,6 +559,10 @@ nav a:hover
 .post .body p
 {
     margin: 0 0 20px 0;
+}
+.post .body ul p
+{
+    margin: 0;
 }
 
 
@@ -589,7 +597,6 @@ body.photos nav a:hover
     max-width: 21cm; /* A4 */
     margin: 0 auto;
 
-    //background-color: red;
     padding: 7px;
 }
 #cv a
@@ -659,9 +666,7 @@ body.photos nav a:hover
 
     border-radius: 7px;
     border: 1px solid rgb(220,220,220);
-    //border: none;
 
-    //background-color: rgb(245,245,245);
     box-shadow: 0px 3px 0px rgb(200,200,200);
     
     margin: 0;
@@ -724,7 +729,6 @@ body.photos nav a:hover
 #cv table
 {
     border-radius: 5px;
-    //background-color: rgb(245,245,245);
     box-shadow: 0px 3px 0px rgb(200,200,200);
     border: 1px solid rgb(220,220,220);
 }
