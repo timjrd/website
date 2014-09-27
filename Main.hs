@@ -37,7 +37,7 @@ main = do
     let port = read p
     s <- S.bindIPv4 host port
     S.simpleHTTPWithSocket s (S.nullConf {S.port=port}) $ do
-      S.decodeBody (S.defaultBodyPolicy "/tmp/" 4096 4096 4096)
+      S.decodeBody (S.defaultBodyPolicy "/tmp/" 4096 15000 4096)
       website datadir db
 
 

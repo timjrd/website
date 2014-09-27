@@ -173,8 +173,8 @@ processForm mi db admin = do
 readForm :: ServerPart (Mo.Writer [String] Post)
 readForm = do
   doc'   <- unpack <$> lookText "content"
-  format <- unpack <$> lookText "format"
-  let doc     = readOrg def $ filter (/='\r') doc'
+  --format <- unpack <$> lookText "format"
+  let doc     = tweaks $ readOrg def $ filter (/='\r') doc'
       cover   = take 4 $ extractImages doc
       body'   = extractBody doc
       preview = writeHtmlString def {writerHtml5=True} <$> extractPreview body'
@@ -194,10 +194,23 @@ readForm = do
       body
       []
       doc'
-      "NO format"
+      "Emacs Org mode"
 
 
 ---- Pandoc
+tweaks :: Pandoc -> Pandoc
+tweaks = Doc.walk i . Doc.walk b
+
+  where b :: Block -> Block
+        b (Header level a c) = (Header (level+1) a c)
+        b t@Table{} = Div ("", ["table"], []) [t]
+        b x = x
+
+        i :: Inline -> Inline
+        i (Link c t) = Link [Span ("", ["pop"], []) c] t
+        i x = x
+
+    
 extractHeaders = Doc.query f
   where f :: Block -> [String]
         f (Header _ _ x) = [stringify x]
@@ -248,7 +261,7 @@ postForm' p = do
 
   H.label ! for "in_format" $ "format"
   select ! A.name "format" ! A.id "in_format" $ do
-    option "un certain format" -- en attente de Pandoc
+    option "Emacs Org mode" -- pour l'instant ça suffit largement...
 
   input ! type_ "submit" ! A.name "draft"   ! value "Sauvegarder en brouillon"
   input ! type_ "submit" ! A.name "publish" ! value "Publier"
