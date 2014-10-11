@@ -31,9 +31,8 @@ import Data.Time
 import Data.Text.Lazy.Encoding (encodeUtf8)
 
 main = do
-  datadir <- getEnv "OPENSHIFT_DATA_DIR"
+  [host,p,datadir] <- getArgs
   bracket (openLocalStateFrom (datadir++"/database")  initialDataBase) (createCheckpointAndClose) $ \db -> do
-    [host,p] <- getArgs
     let port = read p
     s <- S.bindIPv4 host port
     S.simpleHTTPWithSocket s (S.nullConf {S.port=port}) $ do
