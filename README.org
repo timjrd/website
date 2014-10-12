@@ -1,0 +1,4 @@
+* me-timjrd.rhcloud.com
+Voici les sources de mon petit site perso. dynamique écrit en Haskell. Si vous lisez le code prenez un peu d'aspirine avant : c'est mon premier projet en Haskell.
+
+Le serveur est compilé en statique (~80Mo), et hebergé sur OpenShift.
