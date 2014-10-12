@@ -3,8 +3,9 @@ Voici les sources de mon petit site perso. dynamique écrit en Haskell. Si vous 
 
 Il est en ligne pour tests mais pas encore finalisé, ça devrait pas tarder.
 
+** technos
 Le serveur est compilé en 100% statique (~80Mo), et hebergé sur OpenShift. Il utilise principalement :
 - [[http://happstack.com][Happstack (lite)]]  :: serveur et framework web
 - [[http://acid-state.seize.it/][Acid-State]] :: base de données 
 - [[http://jaspervdj.be/blaze/][BlazeHtml]]  :: HTML templating 
-- [[Pandoc]]     :: saisie des articles : conversion Markdown/EmacsOrgMode -> HTML
+- [[http://johnmacfarlane.net/pandoc/][Pandoc]]     :: saisie des articles : conversion Markdown/EmacsOrgMode -> HTML
