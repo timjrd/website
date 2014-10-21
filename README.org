@@ -3,7 +3,7 @@ Voici les sources de mon petit site perso. dynamique écrit en [[http://www.hask
 
 Il est [[http://me-timjrd.rhcloud.com][en ligne]] pour tests mais pas encore finalisé, ça devrait pas tarder.
 
-Le serveur est compilé en 100% statique (~80Mo), et hebergé sur OpenShift. Il utilise principalement :
+Le serveur est compilé en 100% statique (~80Mo), et hebergé sur [[https://www.openshift.com/][OpenShift]]. Il utilise principalement :
 - [[http://happstack.com][Happstack (lite)]]  :: serveur et framework web
 - [[http://acid-state.seize.it/][Acid-State]] :: base de données 
 - [[http://jaspervdj.be/blaze/][BlazeHtml]]  :: HTML templating 
