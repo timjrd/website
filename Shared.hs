@@ -2,11 +2,25 @@
 
 module Shared where
 
+import Data.Monoid
+import Control.Applicative
 import Control.Monad
+import Control.Monad.Writer
+import Control.Monad.State
+
+import qualified Data.Map as M
+
 import Text.Blaze.XHtml5
 import Text.Blaze.XHtml5.Attributes
 import qualified Text.Blaze.XHtml5 as H
 import qualified Text.Blaze.XHtml5.Attributes as A
+
+import Text.Pandoc
+import Text.Pandoc.Definition
+import qualified Text.Pandoc.Walk as Doc
+import Text.Pandoc.Shared (stringify)
+
+import Data.List.Split (splitOn)
 
 import Data.Time
 import Data.Time.ISO8601
@@ -15,7 +29,6 @@ import Happstack.Lite
 import Happstack.Lite as Hap
 
 ---- Paths
-
 staticDir    = "/static"   :: String
 stylesheet   = "/static/style.css" :: String
 faceImg      = "/static/face.jpg"  :: String
@@ -39,6 +52,74 @@ notFound' current admin msg = notFound $ page "Introuvable" current admin $
 
 aa = a . (H.span ! class_ "pop")
 time' d = time ! datetime (toValue $ formatISO8601 d)
+
+
+---- Pandoc
+extract doc@(Pandoc meta blocks) = ( Doc.query titles header
+                                   , M.fromList $ Doc.query infos header
+                                   , Doc.query images doc
+                                   , (Pandoc meta preview)
+                                   , (Pandoc meta body)
+                                   )
+    
+    where (header,body) = let (h,b) = break (==HorizontalRule) blocks 
+                          in  (h,tail b)
+
+          preview = takeWhile (/=HorizontalRule) body 
+    
+          titles :: Block -> [String]
+          titles (Header _ _ x) = [stringify x]
+          titles _ = []
+
+          images :: Inline -> [(String,String)]
+          images (Image alt (url,_)) = [(url, stringify alt)]
+          images _ = []
+
+          infos :: Block -> [(String,[Block])]
+          infos (DefinitionList l) =  (\(a,b) -> (stringify a, concat b)) <$> l
+          infos _ = []
+
+
+tweaks :: Pandoc -> Pandoc
+tweaks = Doc.walk i . Doc.walk b
+    where b :: Block -> Block
+          b (Header level a c) = (Header (level+1) a c)
+          b t@Table{} = Div ("", ["table"], []) [t]
+          b x = x
+
+          i :: Inline -> Inline
+          i (Link c t) = Link [Span ("", ["pop"], []) c] t
+          i x = x
+
+stringify' blocks = tail $ concat $ (\b -> '\n':(stringify'' b)) <$> blocks
+stringify'' block = case block of
+                      (Plain a)      -> stringify a
+                      (Para  a)      -> stringify a
+                      (RawBlock _ a) -> a
+                      (Header _ _ a) -> stringify a
+                      (Div _ bs)     -> stringify' bs
+                      _              -> ""
+
+-- extractBody doc = evalState (Doc.walkM f doc) 0
+--   where f :: Block -> State Int Block
+--         f h@(Header _ _ _) = do
+--           c <- get
+--           if c < 2
+--             then (put $ c + 1) >> return Null
+--             else return h
+--         f x = return x
+
+-- extractPreview doc = case runState (Doc.walkM f doc) False of
+--   (p,True)  -> Just p
+--   (_,False) -> Nothing
+  
+--   where f :: Block -> State Bool Block
+--         f HorizontalRule = put True >> return Null
+--         f x = do
+--           s <- get
+--           return $ if s then Null else x
+  
+
 
 ---- Templates
 page :: ToMarkup a => String -> String -> Bool -> a -> Response

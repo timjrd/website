@@ -1,6 +1,4 @@
-{-# LANGUAGE OverloadedStrings
-            ,ScopedTypeVariables
-            #-}
+{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 
 module Blog where
 
@@ -14,8 +12,6 @@ import Control.Monad.Writer
 import qualified Control.Monad.Writer as Mo
 import Control.Monad.IO.Class
 import Text.Pandoc
-import qualified Text.Pandoc.Walk as Doc
-import Text.Pandoc.Shared (stringify)
 import Text.Blaze.XHtml5
 import Text.Blaze.XHtml5.Attributes
 import qualified Text.Blaze.XHtml5 as H
@@ -197,49 +193,6 @@ readForm = do
       "Emacs Org mode"
 
 
----- Pandoc
-tweaks :: Pandoc -> Pandoc
-tweaks = Doc.walk i . Doc.walk b
-
-  where b :: Block -> Block
-        b (Header level a c) = (Header (level+1) a c)
-        b t@Table{} = Div ("", ["table"], []) [t]
-        b x = x
-
-        i :: Inline -> Inline
-        i (Link c t) = Link [Span ("", ["pop"], []) c] t
-        i x = x
-
-    
-extractHeaders = Doc.query f
-  where f :: Block -> [String]
-        f (Header _ _ x) = [stringify x]
-        f _ = []
-
-extractImages = Doc.query f
-  where f :: Inline -> [Image]
-        f (Image alt (url,_)) = [(url, stringify alt)]
-        f _ = []
-
-extractBody doc = evalState (Doc.walkM f doc) 0
-  where f :: Block -> State Int Block
-        f h@(Header _ _ _) = do
-          c <- get
-          if c < 2
-            then (put $ c + 1) >> return Null
-            else return h
-        f x = return x
-
-extractPreview doc = case runState (Doc.walkM f doc) False of
-  (p,True)  -> Just p
-  (_,False) -> Nothing
-  
-  where f :: Block -> State Bool Block
-        f HorizontalRule = put True >> return Null
-        f x = do
-          s <- get
-          return $ if s then Null else x
-  
 
 ---- HTML Templates
 postFormLogin p i pub last = do

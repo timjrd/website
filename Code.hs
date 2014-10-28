@@ -182,4 +182,3 @@ readForm = do
 readListWith d = filter (/="") . fmap (unwords . words) . splitOn d
 ifNotBlank s = if all (isSpace) s then Nothing else Just s
 
----- Edit
