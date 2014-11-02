@@ -1,4 +1,5 @@
 /***  Reset & Global ***/
+
 *:focus
 {
     outline: 0;
@@ -27,18 +28,20 @@ h1 a, h2 a
 a > .pop
 {
     border-radius: 5px;
-    box-shadow: 0 4px 0 rgba(200,200,240,1);
+    box-shadow: 0 4px 0 rgba(210,210,240,1);
     position: relative;
     top:  0;
     left: 0;
     transition: all 0.1s linear;
-    background-color: rgb(230,230,255);
+    background-color: rgb(235,235,255);
+
+    padding: 0 6px;
 }
 a:hover > .pop
 {
     top:  4px;
     left: 0;
-    box-shadow: 0 0 0 rgba(200,200,240,1);
+    box-shadow: 0 0 0 rgba(210,210,240,1);
 }
 
 hr
@@ -93,6 +96,16 @@ thead td
     background-color: rgb(70,70,70);
 }
 
+.center
+{
+    text-align: center;
+}
+
+
+
+
+
+/***  Button  ***/
 
 .button em
 {
@@ -106,42 +119,51 @@ thead td
     font-size: 110%;
     border: none;
 }
-.button > .pop
-{
-    display: block;
-    background-color: rgb(140,140,230);
-    padding: 7px 10px;
-    box-shadow: 0 0 0 rgba(140,140,230,0.6);
-    border-radius: 5px;
-    position: relative;
-    top:  0;
-    left: 0;
-    transition: all 0.1s linear;
-}
 .button:hover > .pop
-{
-    top:  -4px;
-    left: 0;
-
-    background-color: rgb(140,140,230);
-    box-shadow: 0px 4px 0 rgba(140,140,230,0.6);
-}
-.button.reverse:hover > .pop
 {
     top:  4px;
     left: 0;
+    box-shadow: 0 0 0 rgb(165,165,255);
+}
+.button.reverse:hover > .pop
+{
+    top:  -4px;
+    left: 0;
+    box-shadow: 0 0 0 rgb(165,165,255);
+}
+.button > .pop
+{
+    display: block;
+    position: relative;
+    padding: 7px 10px;
+    border-radius: 5px;
+    background-color: rgb(140,140,230);
+    transition: all 0.1s linear;
 
+    top:  0;
+    left: 0;
+    box-shadow: 0px 4px 0 rgb(165,165,255);
+    /*background-color: rgb(140,140,230);*/
+}
+.button.reverse > .pop
+{
+    top:  0;
+    left: 0;
     box-shadow: 0 -4px 0 rgba(140,140,230,0.6);
 }
 
+
+/***  Box ***/
+
 .box
 {
-    border: 1px solid rgb(220,220,220);
+    box-sizing: border-box;
     border-radius: 15px;
     padding: 0;
     position: relative;
     z-index: 10;
     background-color: rgba(255,255,255,0.4);
+    box-shadow: 0 0 13px rgba(70,70,70,0.1), inset 0 0 0 1px rgb(220,220,220);
 }
 
 .box h1, .box h2
@@ -200,17 +222,101 @@ thead td
 {
     padding-bottom: 40px;
 }
+.box .more
+{
+    margin-bottom: 4px;
+    margin: 10px;
+}
 .box .more .button > .pop
 {
     border-radius: 0;
 }
+.box .more .button
+{
+}
 .box .more .button:first-child > .pop
 {
-    border-bottom-left-radius: 15px;
+    //border-radius: 15px 0 0 15px;
 }
 .box .more .button:last-child > .pop
 {
-    border-top-right-radius: 5px;
+    //border-radius: 0 15px 15px 0;
+}
+
+/***  Body class  ***/
+
+.body
+{
+    text-align: justify;
+}
+
+.body h2
+{
+    text-align: left;
+    margin: 80px 0 15px 0;
+    font-size: 230%;
+    font-weight: normal;
+    border-bottom: 1px solid rgb(230,230,230);
+}
+.body h3
+{
+    text-align: left;
+    margin: 50px 0 10px 0;
+    font-size: 170%;
+    font-weight: bold;
+}
+.body h4
+{
+    text-align: left;
+    margin: 30px 0 15px 0;
+    font-size: 150%;
+    font-weight: bold;
+    padding: 0 20px;
+
+    display: inline-block;
+    border-bottom: 1px solid rgb(220,220,220);
+}
+.body h5
+{
+    text-align: left;
+    margin: 30px 0 10px 0;
+    font-size: 110%;
+    font-weight: bold;
+    font-style: italic;
+    padding-left: 20px;
+}
+.body h6
+{
+    text-align: left;
+    margin: 25px 0 10px 0;
+    font-size: 100%;
+    font-weight: bold;
+    font-style: italic;
+    padding-left: 30px;
+    color: rgb(90,90,90);
+}
+
+.body h2 + *, .body h3 + *, .body h4 + *, .body h5 + *, .body h6 + *
+{
+    margin-top: 0;
+}
+
+.body p
+{
+    margin: 0 0 20px 0;
+}
+.body ul p
+{
+    margin: 0;
+}
+
+.body img
+{
+    float: right;
+    clear: both;
+    margin: 15px 0 15px 15px;
+    border: 10px solid rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 
@@ -224,7 +330,7 @@ header
 header h1
 {
     display: inline;
-    font-size: 125%;
+    font-size: 120%;
     font-weight: normal;
 }
 header h2
@@ -236,11 +342,6 @@ header h2
 }
 header .logout
 {
-    color: white;
-    background-color: rgb(220,100,100);
-    font-weight: bold;
-    padding: 8px;
-
     position: absolute;
     top: 0;
     left: 0;
@@ -282,13 +383,13 @@ footer .heart
 nav
 {
     text-align: center;
-    font-size: 170%;
+    font-size: 180%;
     margin: 0 0 60px 0;
 }
 nav a
 {
     margin: 0 1px 0 0;
-    padding: 0 15px;
+    padding: 0 30px;
     text-decoration: none;
     position: static;
     color: rgba(0,0,0,0.4);
@@ -388,7 +489,7 @@ nav a:hover
 }
 .post-preview .box
 {
-    box-shadow: 0px 4px 0 rgb(210,210,210);
+    //box-shadow: 0px 4px 0 rgb(210,210,210);
 }
 .post-preview div.header
 {
@@ -403,7 +504,7 @@ nav a:hover
     bottom: 0;
     margin: 0;
 }
-.thread.deco
+.thread-deco
 {
     position: relative;
     z-index: 2;
@@ -411,17 +512,12 @@ nav a:hover
     border-left: 4px solid rgb(220,220,220);
     border-right: 4px solid rgb(220,220,220);
     vertical-align: top;
-}
-.post-preview:first-of-type .thread.deco
-{
-    height: 50px;
-}
-.post-preview .thread.deco
-{
+
     display: inline-block;
     height: 90px;
     margin-right: 50%;
 }
+.post-preview:first-of-type .thread-deco { height: 45px; }
 
 .post-preview .date
 {
@@ -465,16 +561,16 @@ nav a:hover
     max-width: 32cm;
     margin: auto;
 }
-.post h1, .post h2
+.post .header h1, .post .header h2
 {
     padding: 0;
     margin: 0;
 }
-.post h1
+.post .header h1
 {
     font-size: 260%;
 }
-.post h2
+.post .header h2
 {
     font-size: 150%;
     font-weight: normal;
@@ -506,66 +602,34 @@ nav a:hover
     margin-bottom: 25px;
 }
 
-.post .body
-{
-}
 
-.post .body h2
+.thread-label
 {
-    margin: 80px 0 15px 0;
-    font-size: 230%;
-    font-weight: normal;
-    border-bottom: 1px solid rgb(230,230,230);
+    text-align: right;
 }
-.post .body h3
+.thread-label .center > *
 {
-    margin: 50px 0 10px 0;
-    font-size: 170%;
-    font-weight: bold;
-}
-.post .body h4
-{
-    margin: 30px 0 15px 0;
-    font-size: 150%;
-    font-weight: bold;
-    padding: 0 20px;
-
+    position: relative;
+    z-index: 10;
+    border-radius: 10px;
+    border: 4px solid rgb(220,220,220);
     display: inline-block;
-    border-bottom: 1px solid rgb(220,220,220);
-}
-.post .body h5
-{
-    margin: 30px 0 10px 0;
-    font-size: 110%;
-    font-weight: bold;
-    font-style: italic;
-    padding-left: 20px;
-}
-.post .body h6
-{
-    margin: 25px 0 10px 0;
-    font-size: 100%;
-    font-weight: bold;
-    font-style: italic;
-    padding-left: 30px;
-    color: rgb(90,90,90);
 }
 
-.post .body h2 + *, .post .body h3 + *, .post .body h4 + *, .post .body h5 + *, .post .body h6 + *
+.prev .thread-deco { height: 70px; }
+.thread-label .button, .thread-label .button
 {
-    margin-top: 0;
+    padding: 2px 2px 6px 2px;
 }
-
-.post .body p
-{
-    margin: 0 0 20px 0;
-}
-.post .body ul p
+.thread-label h3, .thread-label h4
 {
     margin: 0;
+    padding: 7px 15px;
+
+    font-size: 100%;
+    font-weight: normal;
+    color: rgb(130,130,130); 
 }
-
-
 
 /***  Photos  ***/
 body.photos

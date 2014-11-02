@@ -7,12 +7,15 @@
             ,TemplateHaskell
             ,TypeFamilies
             ,RecordWildCards
+            ,QuasiQuotes
             #-}
 
 module Data where
 
 
 import Shared
+
+import Text.RawString.QQ
 
 import Control.Applicative  ( (<$>) )
 import Control.Exception    ( bracket )
@@ -33,6 +36,8 @@ import Data.Time
 import qualified Data.Map as M
 import Data.IxSet
 
+
+
 data DataBase = DataBase { session     :: Session
 
                          , projects    :: [Project']
@@ -46,11 +51,11 @@ data DataBase = DataBase { session     :: Session
 initialDataBase = DataBase
                   Closed
                   
-                  [demoProject']
+                  []
                   M.empty
 
-                  (insert demoPost' $ insert demoPost'' empty)
-                  0
+                  empty
+                  1
 
 ---- Session
 data Session = Session ByteString UTCTime | Closed
@@ -116,33 +121,43 @@ instance Indexable PublishablePost where
 
 
 
-demoPost' = PublishedPost
-            0
-            (UTCTime (fromGregorian 2012 12 31) 0)
-            (Just $ UTCTime (fromGregorian 2013 01 01) 0)
-            demoPost
-            Nothing
+demoPost = [r|
+*  Titre
+** sous-titre
 
-demoPost'' = PublishedPost
-             1
-             (UTCTime (fromGregorian 2014 12 31) 0)
-             (Just $ UTCTime (fromGregorian 2015 02 03) 0)
-             demoPost
-             Nothing
-           
-demoPrev = "Aujourd'hui quelqu'un est mort. Né dans un petit village, il n'est plus."
-demoBod  = demoPrev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
+- une
+- list
+- de tags
 
-demoPost = Post
-           "Il est re-vivant !"
-           "oui c'est terrible, mais c'est la vie"
-           (Just demoPrev)
-           [ (demoImg,"bsod")
-           , (demoImg',"bsod") ]
-           demoBod
-           ["Informatique", "Haskell", "Programmation"]
-           demoBod
-           "kamoulox"
+----------------------
+
+Ici l'introduction avant coupure.
+
+----------------------
+
+Et la suite ici...
+|]
+
+-- demoPost' = PublishedPost
+--             0
+--             (UTCTime (fromGregorian 2012 12 31) 0)
+--             (Just $ UTCTime (fromGregorian 2013 01 01) 0)
+--             demoPost
+--             Nothing
+
+-- demoPrev = "Aujourd'hui quelqu'un est mort. Né dans un petit village, il n'est plus."
+-- demoBod  = demoPrev ++ "Il est sous terre, peut être se nourrit-il de pissenlits."
+
+-- demoPost = Post
+--            "Il est re-vivant !"
+--            "oui c'est terrible, mais c'est la vie"
+--            (Just demoPrev)
+--            [ (demoImg,"bsod")
+--            , (demoImg',"bsod") ]
+--            demoBod
+--            ["Informatique", "Haskell", "Programmation"]
+--            demoBod
+--            "kamoulox"
 
 blogPage :: Int -> Query DataBase ([PublishablePost], Bool)
 blogPage np = do
@@ -173,10 +188,10 @@ postsAfter n date = do
   return $
     reverse $ take n $ toAscList (Proxy :: Proxy UTCTime) (ps @= PostStatusPublished @> date)
 
-getPost :: Integer -> Query DataBase (Maybe PublishablePost)
-getPost i = do
+getPost :: Integer -> Bool -> Query DataBase (Maybe PublishablePost)
+getPost i draft = do
   ps <- blog <$> ask
-  return $ getOne $ ps @= PostStatusPublished @= i
+  return $ getOne $ (if draft then ps else ps @= PostStatusPublished) @= i
 
 getPostDrafts :: Query DataBase [PublishablePost]
 getPostDrafts = do
@@ -186,18 +201,20 @@ getPostDrafts = do
 draftNewPost :: Post -> Update DataBase Integer
 draftNewPost p = do
   db <- get
-  put $ db { blog = insert (PostDraft (nextPostId db) p) (blog db)
-           , nextPostId = (nextPostId db) + 1
+  let i = nextPostId db
+  put $ db { blog = insert (PostDraft i p) (blog db)
+           , nextPostId = i + 1
            }
-  return $ (nextPostId db) - 1
+  return i
 
 publishNewPost :: Post -> UTCTime -> Update DataBase Integer
 publishNewPost p ct = do
   db <- get
-  put $ db { blog = insert (PublishedPost (nextPostId db) ct Nothing p Nothing) (blog db)
-           , nextPostId = (nextPostId db) + 1
+  let i = nextPostId db
+  put $ db { blog = insert (PublishedPost i ct Nothing p Nothing) (blog db)
+           , nextPostId = i + 1
            }
-  return $ (nextPostId db) - 1
+  return i
 
 
 publishPost :: Integer -> Post -> UTCTime -> Update DataBase Integer
@@ -266,27 +283,51 @@ data Project = Project { projectName  :: String
 type Url = String
 type Image = (Url,String)
 
-demoProject' = Project' "uselesoft" (Published demoProject Nothing)
+demoProject = [r|
+*  Nom du projet
+** sous-titre
 
-demoProject = Project
-              "UseleSoft"
-              "logiciel de voyance précognitive"
-              desc
-              desc
-              "brut"
-              "projet associatif"
-              "un des principaux dévellopeurs"
-              ["Haskell","html/css"]
-              ["Happstack","BlazeHtml","acid-state"]
-              [(demoImg,"bsod")
-              ,(demoImg',"bsod")]
-              (Just "http://www.nyan.cat/")
-              Nothing
+- cadre du projet
+- rôle personel
 
-  where desc = "UseleSoft est une implémentation numérique de la precrime (Minority Report), le tout étant bien sûr une arnaque (boule de cristale). Kamoulox."
-demoImg = "http://www.pc-code.com/base/numetlet/let/b/images/bsod.jpg"
-demoImg' = "http://upload.wikimedia.org/wikipedia/commons/a/ae/Windows8-BSOD.jpg"
 
+- principales
+- technologies
+- utilisés
+
+
+- technologies
+- secondaires
+
+
+- http://url-projet
+- http://url-telechargement
+
+-----------------------
+
+Description du projet...
+|]
+
+-- demoProject' = Project' "uselesoft" (Published demoProject Nothing)
+
+-- demoProject = Project
+--               "UseleSoft"
+--               "logiciel de voyance précognitive"
+--               desc
+--               desc
+--               "brut"
+--               "projet associatif"
+--               "un des principaux dévellopeurs"
+--               ["Haskell","html/css"]
+--               ["Happstack","BlazeHtml","acid-state"]
+--               [(demoImg,"bsod")
+--               ,(demoImg',"bsod")]
+--               (Just "http://www.nyan.cat/")
+--               Nothing
+
+--   where desc = "UseleSoft est une implémentation numérique de la precrime (Minority Report), le tout étant bien sûr une arnaque (boule de cristale). Kamoulox."
+-- demoImg = "http://www.pc-code.com/base/numetlet/let/b/images/bsod.jpg"
+-- demoImg' = "http://upload.wikimedia.org/wikipedia/commons/a/ae/Windows8-BSOD.jpg"
 
 
 insertAt i x xs = let (a,b) = splitAt i xs in a ++ [x] ++ b

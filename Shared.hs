@@ -8,8 +8,6 @@ import Control.Monad
 import Control.Monad.Writer
 import Control.Monad.State
 
-import qualified Data.Map as M
-
 import Text.Blaze.XHtml5
 import Text.Blaze.XHtml5.Attributes
 import qualified Text.Blaze.XHtml5 as H
@@ -53,19 +51,23 @@ notFound' current admin msg = notFound $ page "Introuvable" current admin $
 aa = a . (H.span ! class_ "pop")
 time' d = time ! datetime (toValue $ formatISO8601 d)
 
+onlyIf c then' = if c then then' else return ()
 
 ---- Pandoc
 extract doc@(Pandoc meta blocks) = ( Doc.query titles header
-                                   , M.fromList $ Doc.query infos header
+                                   , Doc.query infos header
                                    , Doc.query images doc
-                                   , (Pandoc meta preview)
-                                   , (Pandoc meta body)
+                                   , Pandoc meta <$> preview
+                                   , Pandoc meta body
                                    )
     
     where (header,body) = let (h,b) = break (==HorizontalRule) blocks 
                           in  (h,tail b)
 
-          preview = takeWhile (/=HorizontalRule) body 
+          preview = let (a,b) = break (==HorizontalRule) body
+                    in if b == []
+                       then Nothing
+                       else Just a
     
           titles :: Block -> [String]
           titles (Header _ _ x) = [stringify x]
@@ -75,8 +77,8 @@ extract doc@(Pandoc meta blocks) = ( Doc.query titles header
           images (Image alt (url,_)) = [(url, stringify alt)]
           images _ = []
 
-          infos :: Block -> [(String,[Block])]
-          infos (DefinitionList l) =  (\(a,b) -> (stringify a, concat b)) <$> l
+          infos :: Block -> [[String]]
+          infos (BulletList l) = [stringify' <$> l]
           infos _ = []
 
 
@@ -133,18 +135,18 @@ page thetitle current admin thebody = toResponse $ docTypeHtml $ do
       h1 "timothée jourde"
       h2 "site perso"
       if admin
-        then aa ! A.class_ "logout" ! href "/logout" $ "logout"
+        then aa ! A.class_ "logout button" ! href "/logout" $ "logout"
         else return ()
     
     nav $ do
       entry "/blog"   "blog"
       entry "/code"   "code"
-      entry "/photos" "photos"
+      --entry "/photos" "photos"
       entry "/cv"     "cv"
     
     toHtml thebody
 
-    footer $ ul $ do
+    footer ! A.id "bottom" $ ul $ do
       li $ aa ! href "" $ "à propos"
       li $ "valide " >> (aa ! href "/" $ "xhtml") >> " & " >> (aa ! href "/" $ "css")
       li $ "random kiss to " >> (aa ! href "" $ "someone")
@@ -175,6 +177,9 @@ loginAgain = fieldset $ do
   legend "session expiré"
   loginInput
 
+adminBar actions =
+  H.div ! class_ "admin-bar" $ forM_ actions $
+  \(label,url) -> aa ! A.class_ "button" ! href url $ label
 
 ---- CV
         

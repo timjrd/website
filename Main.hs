@@ -47,7 +47,7 @@ website datadir db = do
   if r
     then seeOther' "" "login: after POST, redirect GET"
 
-    else msum [ dir "blog"    $ msum [ dir "page" $ path $ \(i :: Integer) -> echo $ "page"
+    else msum [ dir "blog"    $ msum [ dir "page" $ path $ \n -> Blog.viewBlogPage n db admin
                                      , dir "post" $ path $ \i -> Blog.viewPost i db admin
                                      , dir "edit" $ path $ \i -> msum [ Blog.viewForm    (Just i) db admin
                                                                       , Blog.processForm (Just i) db admin
@@ -67,7 +67,7 @@ website datadir db = do
                                      , Code.published db admin
                                      ]
                 
-              , dir "photos"  $ ok $ page "Photos" "photos" admin ""
+              --, dir "photos"  $ ok $ page "Photos" "photos" admin ""
               , dir "cv"      $ ok $ page "CV" "cv" admin cv
               , dir "static"  $ serveStatic (datadir ++ staticDir)
               , dir "login"   $ ok $ loginPage "/"
@@ -143,4 +143,4 @@ genKey n = do
   return $ concat $ map (unpack . exportSalt) rs
   
 
-echo = ok . toResponse
+--echo = ok . toResponse

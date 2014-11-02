@@ -50,9 +50,9 @@ humanTimeLocale_FR = HumanTimeLocale
     , onYear        = ("le " ++)
     , locale        = timeLocale_FR
 --    , timeZone      = utc
-    , dayOfWeekFmt  = "%l:%M %p à %A"
-    , thisYearFmt   = "%e %B"
-    , prevYearFmt   = "%e %B %Y"
+    , dayOfWeekFmt  = "%A %e %B à %Hh"
+    , thisYearFmt   = "%A %e %B à %Hh"
+    , prevYearFmt   = "%A %e %B %Y à %Hh"
     }
     
 
@@ -88,7 +88,7 @@ timeLocale_FR = TimeLocale {
                              
 
 viewPost i db admin = do
-  mp <- query' db (GetPost i)
+  mp <- query' db (GetPost i False)
   ct <- liftIO $ getCurrentTime
   case mp of
     Nothing  -> notFound' "blog" admin ("404 :)" :: String)
@@ -100,8 +100,13 @@ viewPost i db admin = do
       admin
       
 
+
 lasts db admin = do
   p <- viewBlogPage' 1 db admin
+  ok $ page "Blog" "blog" admin $ p
+
+viewBlogPage n db admin = do
+  p <- viewBlogPage' n db admin
   ok $ page "Blog" "blog" admin $ p
 
 viewBlogPage' n db admin = do
@@ -109,30 +114,30 @@ viewBlogPage' n db admin = do
   ct <- liftIO $ getCurrentTime
   
   return $ do
-    if n > 2
-      then next $ "/blog/page/" ++ (show $ n-1)
-      else if n == 2
-           then next ("/blog" :: String)
-           else return ()
+    onlyIf admin $ adminBar [ ("Nouveau"             , "/blog/new")
+                            , ("Voir les brouillons" , "/blog/NOT-YET-IMPLEMENTED")
+                            ]
     
+    case () of
+      _ | n >  2    -> next $ "/blog/page/" ++ (show $ n-1) ++ "#bottom"
+        | n == 2    -> next ("/blog#bottom" :: String)
+        | otherwise -> H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "derniers billets"
+                  
     forM_ ps $ \(PublishedPost i pub last p _) -> postPreviewHtml p i
                                                   (showMDate ct $ Just pub)
                                                   (showMDate ct last)
                                                   admin
     
-    if pre
-      then prev $ "/blog/page/" ++ (show $ n+1)
-      else return ()
-
+    onlyIf pre $ prev $ "/blog/page/" ++ (show $ n+1)
 
 
 viewForm mi db admin = do
   Hap.method GET
   if not admin then (unauthorized $ loginPage "") else do
     case mi of
-      Nothing -> ok $ page "Édition" "blog" admin $ postForm demoPost 0 Nothing Nothing
+      Nothing -> ok $ page "Édition" "blog" admin $ postForm (parse demoPost) 0 Nothing Nothing
       (Just i) -> do
-        p'' <- query' db (GetPost i)
+        p'' <- query' db (GetPost i True)
         case p'' of
           Nothing   -> notFound' "blog" admin ("404 :)" :: String)
           (Just p') -> do
@@ -148,49 +153,54 @@ processForm mi db admin = do
   Hap.method POST
   ct <- liftIO $ getCurrentTime
   publish <- toBool <$> (optional $ lookText "publish")
-  (p,err) <- runWriter <$> readForm
-  case err of
-    (_:_) -> Hap.badRequest $ page "Édition" "blog" admin (postForm p 0 Nothing Nothing)
-    []    -> 
-      if not admin
-      then unauthorized $ page "Édition" "blog" admin (postFormLogin p 0 Nothing Nothing)
-      else if publish
-           then do i <- case mi of Nothing  -> update' db $ PublishNewPost p ct
-                                   (Just i) -> update' db $ PublishPost i p ct
-                   seeOther' ("/blog/post/" ++ (show i)) "publish: after POST, redirect GET"
+  p <- parse <$> unpack <$> lookText "content"
+
+  if not admin
+  then unauthorized $ page "Édition" "blog" admin (postFormLogin p 0 Nothing Nothing)
+  else if publish
+       then do i <- case mi of Nothing  -> update' db $ PublishNewPost p ct
+                               (Just i) -> update' db $ PublishPost i p ct
+               seeOther' ("/blog/post/" ++ (show i)) "publish: after POST, redirect GET"
                 
-           else do i <- case mi of Nothing  -> update' db $ DraftNewPost p
-                                   (Just i) -> update' db $ DraftPost i p
-                   seeOther' ("/blog/edit/" ++ (show i)) "save draft: after POST, redirect GET"
+       else do i <- case mi of Nothing  -> update' db $ DraftNewPost p
+                               (Just i) -> update' db $ DraftPost i p
+               seeOther' ("/blog/edit/" ++ (show i)) "save draft: after POST, redirect GET"
 
 
     
 
-readForm :: ServerPart (Mo.Writer [String] Post)
-readForm = do
-  doc'   <- unpack <$> lookText "content"
-  --format <- unpack <$> lookText "format"
-  let doc     = tweaks $ readOrg def $ filter (/='\r') doc'
-      cover   = take 4 $ extractImages doc
-      body'   = extractBody doc
-      preview = writeHtmlString def {writerHtml5=True} <$> extractPreview body'
-      body    = writeHtmlString def {writerHtml5=True} body'
-      titles  = case take 2 $ extractHeaders doc of []    -> tell ["titre manquant"] >> return ("sans titre","")
-                                                    [a]   -> return (a,"")
-                                                    [a,b] -> return (a,b)
+-- readForm :: ServerPart (Mo.Writer [String] Post)
+-- readForm = do
+--   doc <- unpack <$> lookText "content"
+--   let (titles, infos, images, preview, body) = extract $ readOrg def $ filter (/='\r') doc
+--       titles' = case take 2 titles of []    -> tell ["titre manquant"] >> return ("sans titre","")
+--                                       [a]   -> return (a,"")
+--                                       [a,b] -> return (a,b)
+--   return $ do
+--     (t,st) <- titles'
+--     return $ Post
+--            t
+--            st
+--            (writeHtmlString def {writerHtml5=True} <$> tweaks <$> preview)
+--            (take 4 images)
+--            (writeHtmlString def {writerHtml5=True} $ tweaks body)
+--            (if infos == [] then [] else Prelude.head infos)
+--            doc
+--            "Emacs Org mode"
 
-  
-  return $ do
-    (t,st) <- titles
-    return $ Post
-      t
-      st
-      preview
-      cover
-      body
-      []
-      doc'
-      "Emacs Org mode"
+parse source =
+    let (titles, infos, images, preview, body) = extract $ readOrg def $ filter (/='\r') source
+        (t : st :_) = titles ++ repeat ""
+    in Post
+       (case t of "" -> "Sans titre"
+                  _  -> t)
+       st
+       (writeHtmlString def {writerHtml5=True} <$> tweaks <$> preview)
+       (take 4 images)
+       (writeHtmlString def {writerHtml5=True} $ tweaks body)
+       (if infos == [] then [] else Prelude.head infos)
+       source
+       "Emacs Org mode"
 
 
 
@@ -209,24 +219,24 @@ postForm p i pub last = do
   postHtml p pub last False
 
 postForm' p = do
-  H.label ! for "in_content" $ "article"
+  --H.label ! for "in_content" $ "article"
   textarea ! A.name "content" ! A.id "in_content" $ toHtml $ postSource p
 
-  H.label ! for "in_format" $ "format"
-  select ! A.name "format" ! A.id "in_format" $ do
-    option "Emacs Org mode" -- pour l'instant ça suffit largement...
+  -- H.label ! for "in_format" $ "format"
+  -- select ! A.name "format" ! A.id "in_format" $ do
+  --   option "Emacs Org mode" -- pour l'instant ça suffit largement...
 
+  br
   input ! type_ "submit" ! A.name "draft"   ! value "Sauvegarder en brouillon"
   input ! type_ "submit" ! A.name "publish" ! value "Publier"
     
 
-next ref = H.div ! class_ "next" $ do
-  a ! href (toValue $ ref) $ "articles suivants"
-  H.div ! class_ "thread deco" $ ""
+next ref = H.div ! class_ "next thread-label" $ do
+  H.div ! class_ "center" $ aa ! class_ "button" ! href (toValue $ ref) $ "articles suivants"
 
-prev ref = H.div ! class_ "prev" $ do
-  H.div ! class_ "thread deco" $ ""
-  a ! href (toValue $ ref) $ "articles précédents"
+prev ref = H.div ! class_ "prev thread-label" $ do
+  H.div ! class_ "thread-deco" $ ""
+  H.div ! class_ "center" $ aa ! class_ "button" ! href (toValue $ ref) $ "articles précédents"
 
 
 dateHtml pub last = let lastHtml = last <$< \(u,d) -> H.span $ do " modifié " ; (time' u) $ toHtml d
@@ -234,8 +244,9 @@ dateHtml pub last = let lastHtml = last <$< \(u,d) -> H.span $ do " modifié " ;
 
                     in if last == Nothing && pub == Nothing then return () else do
                       H.div ! class_ "date" $ do
-                        mToHtml pubHtml
                         mToHtml lastHtml
+                        mToHtml pubHtml
+                        
 
   
   
@@ -260,7 +271,7 @@ postHtml p pub last edit = article ! class_ "post" $ do
 postPreviewHtml :: Post -> Integer -> (Maybe (UTCTime,String)) -> (Maybe (UTCTime,String)) -> Bool -> Html
 postPreviewHtml p i pub last edit = article ! class_ "post-preview" ! A.id (toValue i) $ do
   H.div ! class_ "header" $ do
-    H.div ! class_ "thread deco" $ ""
+    H.div ! class_ "thread-deco" $ ""
     dateHtml pub last
 
     case (postTags p) of [] -> return ()
