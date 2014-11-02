@@ -45,13 +45,16 @@ website datadir db = do
   admin <- authenticate (datadir ++ "/PASSWORD") db
   r <- loginRedirect
   if r
-    then seeOther' "" "login: after POST, redirect GET"
+    then seeOther' ""
 
-    else msum [ dir "blog"    $ msum [ dir "page" $ path $ \n -> Blog.viewBlogPage n db admin
-                                     , dir "post" $ path $ \i -> Blog.viewPost i db admin
-                                     , dir "edit" $ path $ \i -> msum [ Blog.viewForm    (Just i) db admin
-                                                                      , Blog.processForm (Just i) db admin
-                                                                      ]
+    else msum [ dir "blog"    $ msum [ dir "page"      $ path $ \n -> Blog.viewBlogPage n db admin
+                                     , dir "post"      $ path $ \i -> Blog.viewPost i db admin
+                                     , dir "drafts"    $ Blog.drafts db admin
+                                     , dir "unpublish" $ path $ \i -> Blog.unpublish i db admin
+                                     , dir "edit"      $ path $ \i -> msum [ Blog.viewForm    (Just i) db admin
+                                                                           , Blog.processForm (Just i) db admin
+                                                                           ]
+                                       -- new devrais seulement créer le post et rediriger vers /edit
                                      , dir "new"  $ msum [ Blog.viewForm    Nothing db admin
                                                          , Blog.processForm Nothing db admin
                                                          ]
@@ -64,6 +67,9 @@ website datadir db = do
                                      , dir "new" $ msum [ Code.viewForm    Nothing db admin
                                                         , Code.processForm Nothing db admin
                                                         ]
+                                     , dir "drafts"    $ Code.drafts db admin
+                                     , dir "unpublish" $ path $ \i -> Code.unpublish i db admin
+
                                      , Code.published db admin
                                      ]
                 
@@ -71,10 +77,11 @@ website datadir db = do
               , dir "cv"      $ ok $ page "CV" "cv" admin cv
               , dir "static"  $ serveStatic (datadir ++ staticDir)
               , dir "login"   $ ok $ loginPage "/"
-              , dir "logout"  $ (update' db CloseSession) >> (ok $ page "" "" False "")
+              , dir "logout"  $ (update' db CloseSession) >> Blog.lasts db False
 
               , Blog.lasts db admin
               ]
+
   
 
 serveStatic = serveDirectory EnableBrowsing []

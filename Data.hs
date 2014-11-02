@@ -415,6 +415,11 @@ publishedProjects = filter f . projects <$> ask
   where f (Project' _ (Published p _)) = True
         f (Project' _ (Draft _))       = False
 
+projectDrafts :: Query DataBase [Project']
+projectDrafts = filter f . projects <$> ask
+  where f (Project' _ (Published p _)) = False
+        f (Project' _ (Draft _))       = True
+
 projectIds :: Query DataBase [Id]
 projectIds = map (\(Project' i _) -> i) . projects <$> ask
   
@@ -453,6 +458,7 @@ $(makeAcidic ''DataBase [ 'publishNewProject
                           , 'deleteProject
                           , 'allProjects
                           , 'publishedProjects
+                          , 'projectDrafts
                           , 'projectIds
                             , 'findProject
                           , 'editProject

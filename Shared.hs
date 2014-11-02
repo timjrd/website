@@ -42,8 +42,8 @@ mToHtml x = toHtml $ case x of (Just a) -> a
 toBool a = case a of Nothing -> False
                      Just _  -> True
 
-seeOther' :: String -> String -> ServerPart Response
-seeOther' url desc = seeOther url $ toResponse desc
+seeOther' :: String -> ServerPart Response
+seeOther' url = seeOther url $ toResponse ()
 
 notFound' current admin msg = notFound $ page "Introuvable" current admin $
                               H.div ! A.id "notFound" $ toHtml msg
@@ -52,6 +52,10 @@ aa = a . (H.span ! class_ "pop")
 time' d = time ! datetime (toValue $ formatISO8601 d)
 
 onlyIf c then' = if c then then' else return ()
+onlyIfAuthorized c then' = if c
+                           then then'
+                           else unauthorized $ loginPage ""
+
 
 ---- Pandoc
 extract doc@(Pandoc meta blocks) = ( Doc.query titles header
@@ -81,6 +85,10 @@ extract doc@(Pandoc meta blocks) = ( Doc.query titles header
           infos (BulletList l) = [stringify' <$> l]
           infos _ = []
 
+writeHtmlString' = writeHtmlString options . tweaks
+  where options = def { writerHtml5=True
+                      , writerHighlight=True
+                      }
 
 tweaks :: Pandoc -> Pandoc
 tweaks = Doc.walk i . Doc.walk b
@@ -177,9 +185,8 @@ loginAgain = fieldset $ do
   legend "session expiré"
   loginInput
 
-adminBar actions =
-  H.div ! class_ "admin-bar" $ forM_ actions $
-  \(label,url) -> aa ! A.class_ "button" ! href url $ label
+button' :: String -> (Html -> Html)
+button' ref = aa ! class_ "button" ! href (toValue ref)
 
 ---- CV
         

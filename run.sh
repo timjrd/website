@@ -14,7 +14,7 @@ function main
     mkdir -p .data-dir
     ln -srT static .data-dir/static
 
-    last=$(modif)
+    last=0
     while true
     do
 	if [ $last -ne $(modif) ]

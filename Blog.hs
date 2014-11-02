@@ -94,7 +94,7 @@ viewPost i db admin = do
     Nothing  -> notFound' "blog" admin ("404 :)" :: String)
     (Just (PublishedPost _ pub last p _)) ->
       ok $ page "Blog" "blog" admin $
-      postHtml p
+      postHtml p i
       (showMDate ct $ Just pub)
       (showMDate ct last)
       admin
@@ -114,9 +114,10 @@ viewBlogPage' n db admin = do
   ct <- liftIO $ getCurrentTime
   
   return $ do
-    onlyIf admin $ adminBar [ ("Nouveau"             , "/blog/new")
-                            , ("Voir les brouillons" , "/blog/NOT-YET-IMPLEMENTED")
-                            ]
+    onlyIf admin $ H.div ! class_ "center button-bar" $ do
+      button' "/blog/new"    "Nouveau"
+      button' "/blog/drafts" "Voir les brouillons"
+
     
     case () of
       _ | n >  2    -> next $ "/blog/page/" ++ (show $ n-1) ++ "#bottom"
@@ -130,10 +131,21 @@ viewBlogPage' n db admin = do
     
     onlyIf pre $ prev $ "/blog/page/" ++ (show $ n+1)
 
+drafts db admin = onlyIfAuthorized admin $ do
+  ps <- query' db GetPostDrafts
 
+  ok $ page "Blog" "blog" admin $ do
+    H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "brouillons"
+    forM_ ps $ \(PostDraft i p) -> postPreviewHtml p i
+                                   Nothing Nothing admin
+
+unpublish i db admin = onlyIfAuthorized admin $ do
+  update' db (UnpublishPost i)
+  seeOther' $ "/blog/edit/" ++ (show i)
+  
 viewForm mi db admin = do
   Hap.method GET
-  if not admin then (unauthorized $ loginPage "") else do
+  onlyIfAuthorized admin $ do
     case mi of
       Nothing -> ok $ page "Édition" "blog" admin $ postForm (parse demoPost) 0 Nothing Nothing
       (Just i) -> do
@@ -160,11 +172,11 @@ processForm mi db admin = do
   else if publish
        then do i <- case mi of Nothing  -> update' db $ PublishNewPost p ct
                                (Just i) -> update' db $ PublishPost i p ct
-               seeOther' ("/blog/post/" ++ (show i)) "publish: after POST, redirect GET"
+               seeOther' $ "/blog/post/" ++ (show i)
                 
        else do i <- case mi of Nothing  -> update' db $ DraftNewPost p
                                (Just i) -> update' db $ DraftPost i p
-               seeOther' ("/blog/edit/" ++ (show i)) "save draft: after POST, redirect GET"
+               seeOther' $ "/blog/edit/" ++ (show i)
 
 
     
@@ -195,9 +207,9 @@ parse source =
        (case t of "" -> "Sans titre"
                   _  -> t)
        st
-       (writeHtmlString def {writerHtml5=True} <$> tweaks <$> preview)
+       (writeHtmlString' <$> preview)
        (take 4 images)
-       (writeHtmlString def {writerHtml5=True} $ tweaks body)
+       (writeHtmlString' body)
        (if infos == [] then [] else Prelude.head infos)
        source
        "Emacs Org mode"
@@ -211,12 +223,12 @@ postFormLogin p i pub last = do
     postForm' p
 
   postPreviewHtml p i pub last False
-  postHtml p pub last False
+  postHtml p i pub last False
 
 postForm p i pub last = do
   H.form ! action "" ! A.method "POST" ! enctype "multipart/form-data" $ postForm' p
   postPreviewHtml p i pub last False
-  postHtml p pub last False
+  postHtml p i pub last False
 
 postForm' p = do
   --H.label ! for "in_content" $ "article"
@@ -248,11 +260,13 @@ dateHtml pub last = let lastHtml = last <$< \(u,d) -> H.span $ do " modifié " ;
                         mToHtml pubHtml
                         
 
-  
+editBar i = H.div ! class_ "button-bar" $ do
+  button' ("/blog/edit/"      ++ (show i)) "modifier"
+  button' ("/blog/unpublish/" ++ (show i)) "retirer"
   
     
-postHtml :: Post -> (Maybe (UTCTime,String)) -> (Maybe (UTCTime,String)) -> Bool -> Html
-postHtml p pub last edit = article ! class_ "post" $ do
+postHtml :: Post -> Integer -> (Maybe (UTCTime,String)) -> (Maybe (UTCTime,String)) -> Bool -> Html
+postHtml p i pub last edit = article ! class_ "post" $ do
   H.div ! class_ "header" $ do
     h1 $ a ! href (toValue $ "/blog/post/" ++ (show i)) $ toHtml $ postTitle p
     h2 $ toHtml $ postSubTitle p
@@ -262,7 +276,7 @@ postHtml p pub last edit = article ! class_ "post" $ do
                          ts -> ul ! class_ "tags" $ forM_ ts (li . toHtml)
 
 
-  if edit then aa ! href (toValue $ "/blog/edit/" ++ (show i)) $ "modifier" else return ()
+  onlyIf edit $ editBar i
   
   H.div ! class_ "body" $ preEscapedToHtml $ postBody p
   
@@ -283,7 +297,7 @@ postPreviewHtml p i pub last edit = article ! class_ "post-preview" ! A.id (toVa
         h1 $ a ! href (toValue $ "/blog/post/" ++ (show i)) $ toHtml $ postTitle p
         h2 $ toHtml $ postSubTitle p
 
-        if edit then aa ! href (toValue $ "/blog/edit/" ++ (show i)) $ "modifier" else return ()
+        onlyIf edit $ editBar i
   
         H.div ! class_ "body" $ preEscapedToHtml $ case (postPreview p) of (Just a) -> a
                                                                            Nothing  -> (postBody p)

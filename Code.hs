@@ -33,6 +33,10 @@ import Data.Acid
 
 ---- HTML Templates
 
+editBar i = H.div ! class_ "button-bar" $ do
+  button' ("/code/edit/"      ++ (urlEncode i)) "modifier"
+  button' ("/code/unpublish/" ++ (urlEncode i)) "retirer"
+
 projectHtml :: Project -> String -> Bool -> Html
 projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ urlEncode $ i) $ do
   H.div ! class_ "mask" $ do
@@ -40,7 +44,7 @@ projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ url
       h1 $ toHtml $ projectName p
       h2 $ toHtml $ kind p
 
-      if edit then aa ! href (toValue $ "/code/edit/" ++ (urlEncode i)) $ "modifier" else return ()
+      onlyIf edit $ editBar i
   
       H.div  ! class_ "body"    $ preEscapedToHtml $ desc p
       H.span ! class_ "info"    $ toHtml $ context p
@@ -118,16 +122,25 @@ projectForm' p = do
     input ! type_ "submit" ! A.name "publish" ! value "Publier"
     
 
----- /code
+---- Code
 published db admin = do
   Hap.method GET
   ps <- query' db PublishedProjects
   ok $ page "Code" "code" admin $ do
-    onlyIf admin $ adminBar [ ("Nouveau"             , "/code/new")
-                            , ("Voir les brouillons" , "/code/NOT-YET-IMPLEMENTED")
-                            ]
+    onlyIf admin $ H.div ! class_ "button-bar center" $ do
+      button' "/code/new"    "Nouveau"
+      button' "/code/drafts" "Voir les brouillons"
 
-    forM_ ps (\(Project' i (Published p _)) -> projectHtml p i admin)
+    forM_ ps $ \(Project' i (Published p _)) -> projectHtml p i admin
+
+drafts db admin = onlyIfAuthorized admin $ do
+  ps <- query' db ProjectDrafts
+  ok $ page "Code" "code" admin $
+    forM_ ps $ \(Project' i (Draft p)) -> projectHtml p i admin
+
+unpublish i db admin = onlyIfAuthorized admin $ do
+  update' db (UnpublishProject i)
+  seeOther' $ "/code/edit/" ++ (urlEncode i)
 
 
 viewForm :: (Maybe String) -> (AcidState DataBase) -> Bool -> ServerPart Response
@@ -152,11 +165,11 @@ processForm id_ db admin = do
     else if publish
          then do i <- case id_ of Nothing  -> update' db $ PublishNewProject 0 p
                                   (Just i) -> update' db $ PublishProject i Nothing p
-                 seeOther' ("/code#" ++ (urlEncode i)) "publish: after POST, redirect GET"
+                 seeOther' $ "/code#" ++ (urlEncode i)
                                                         
          else do i <- case id_ of Nothing  -> update' db $ DraftNewProject 0 p
                                   (Just i) -> update' db $ DraftProject i Nothing p
-                 seeOther' ("/code/edit/" ++ (urlEncode i)) "save draft: after POST, redirect GET"
+                 seeOther' $ "/code/edit/" ++ (urlEncode i)
           
 
 parse source = 
@@ -170,7 +183,7 @@ parse source =
   in Project
      name'
      kind'
-     (writeHtmlString def {writerHtml5=True} $ tweaks body)
+     (writeHtmlString' body)
      source
      "Emacs Org mode"
      context'

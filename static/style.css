@@ -18,6 +18,7 @@ a
 {
     color: black;
     text-decoration: none;
+    display: inline-block;
 }
 h1 a, h2 a
 {
@@ -62,26 +63,29 @@ li
 }
 
 
+
 table
 {
     text-align: left;
     border-collapse: collapse;
-    border: 1px solid white;
-    box-shadow: 4px 4px 0 rgb(210,210,210);
-    background-color: rgb(100,100,100);
+    margin: auto;
+    border: 1px solid rgb(110,110,110);
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 tr
 {
-    background-color: rgb(245,245,245);
+    background-color: rgba(255,255,255,0.2);
 }
 tr:nth-child(2n)
 {
-    background-color: rgb(225,225,225);
+    background-color: rgba(110,110,110,0.06);
 }
 td
 {
     padding: 2px 6px 2px 6px;
-    border-right: 1px solid white;
+    border-right: 1px dashed rgba(110,110,110,0.3);
+
+    margin: 0;
 }
 th
 {
@@ -315,10 +319,54 @@ thead td
     float: right;
     clear: both;
     margin: 15px 0 15px 15px;
+
     border: 10px solid rgba(255,255,255,0.3);
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+/***  Source Code Highlighting  ***/
+
+/* https://benjeffrey.com/pandoc-syntax-highlighting-css */
+pre
+{
+    text-align: center;
+
+    font-size: 100%;
+    font-family: "DejaVu Sans Mono";
+}
+pre code
+{
+    padding: 10px 10px 10px 0px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    box-sizing: content-box;
+    border-left: 15px solid rgba(255,255,255,0.1);
+}
+code
+{
+    display: inline-block;
+    text-align: left;
+    padding: 0 5px;
+
+    font-size: 100%;
+    font-family: "DejaVu Sans Mono";
+
+    border-radius: 5px;
+    background-color: rgba(0,0,0,0.75);
+    color: rgb(240,240,240);
+}
+
+code > span.kw { color: #f0dfaf; }
+code > span.dt { color: #dfdfbf; }
+code > span.dv { color: #dcdccc; }
+code > span.bn { color: #dca3a3; }
+code > span.fl { color: #c0bed1; }
+code > span.ch { color: #dca3a3; }
+code > span.st { color: #cc9393; }
+code > span.co { color: #7f9f7f; }
+code > span.ot { color: #efef8f; }
+code > span.al { color: #ffcfaf; }
+code > span.fu { color: #efef8f; }
+code > span.er { color: #c3bf9f; }
 
 
 /***  Header, Footer, Menu ***/
@@ -596,9 +644,9 @@ nav a:hover
 {
     border-radius: 15px;
     padding: 15px 15px 10px 15px;
-    background-color: white;
-    border: 1px solid rgb(220,220,220);
-    box-shadow: 0 4px 0 rgb(160,160,160);
+    background-color: rgba(255,255,255,0.3);
+    //border: 1px solid rgb(220,220,220);
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
     margin-bottom: 25px;
 }
 
