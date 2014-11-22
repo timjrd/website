@@ -1,5 +1,5 @@
 * me-timjrd.rhcloud.com
-Voici les sources de mon petit site perso. dynamique écrit en [[http://www.haskell.org][Haskell]]. Si vous lisez le code prenez un peu d'aspirine avant : c'est mon premier projet en Haskell.
+Voici les sources de mon petit site perso. dynamique écrit en [[http://www.haskell.org][Haskell]]. Si vous lisez le code prenez un peu d'aspirine avant, c'est mon premier projet en fonctionnelle.
 
 Il est [[http://me-timjrd.rhcloud.com][en ligne]] pour tests mais pas encore finalisé, ça devrait pas tarder.
 
