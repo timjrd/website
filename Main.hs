@@ -6,8 +6,8 @@ import Shared
 import Data
 import qualified Blog
 import qualified Code
+import qualified Cv
 -- import qualified Photos
--- import qualified CV
 
 import System.Environment (getArgs, getEnv)
 import Happstack.Lite
@@ -74,7 +74,7 @@ website datadir db = do
                                      ]
                 
               --, dir "photos"  $ ok $ page "Photos" "photos" admin ""
-              , dir "cv"      $ ok $ page "CV" "cv" admin cv
+              , dir "cv"      $ ok $ page "CV" "cv" admin Cv.cvHtml
               , dir "static"  $ serveStatic (datadir ++ staticDir)
               , dir "login"   $ ok $ loginPage "/"
               , dir "logout"  $ (update' db CloseSession) >> Blog.lasts db False

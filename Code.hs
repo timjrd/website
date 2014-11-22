@@ -61,7 +61,7 @@ projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ url
 
   H.div ! class_ "more" $ do
     case (moreDetails p) of Nothing -> return ()
-                            Just d  -> aa ! class_ "button" ! href (toValue d) $ em "+ d'infos" >> " / voir les sources"
+                            Just d  -> aa ! class_ "button" ! href (toValue d) $ em "+ d'infos" >> " & voir les sources"
   
     case (download p) of Nothing -> return ()
                          Just d  -> aa ! class_ "button" ! href (toValue d) $ "télécharger"

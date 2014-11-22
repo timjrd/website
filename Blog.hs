@@ -122,7 +122,7 @@ viewBlogPage' n db admin = do
     case () of
       _ | n >  2    -> next $ "/blog/page/" ++ (show $ n-1) ++ "#bottom"
         | n == 2    -> next ("/blog#bottom" :: String)
-        | otherwise -> H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "derniers billets"
+        | otherwise -> H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "Derniers Billets"
                   
     forM_ ps $ \(PublishedPost i pub last p _) -> postPreviewHtml p i
                                                   (showMDate ct $ Just pub)
@@ -256,8 +256,8 @@ dateHtml pub last = let lastHtml = last <$< \(u,d) -> H.span $ do " modifié " ;
 
                     in if last == Nothing && pub == Nothing then return () else do
                       H.div ! class_ "date" $ do
-                        mToHtml lastHtml
                         mToHtml pubHtml
+                        mToHtml lastHtml
                         
 
 editBar i = H.div ! class_ "button-bar" $ do
