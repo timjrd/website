@@ -446,7 +446,7 @@ code > span.er { font-weight: bold; }
 /***  Header, Footer, Menu ***/
 header
 {
-    margin-bottom: 30px;
+    margin-bottom: 50px;
     //background-color: rgba(0,0,0,0.9);
 }
 header .main

@@ -18,7 +18,7 @@ import Data.Acid            ( AcidState, Query, Update
 import Data.Acid.Advanced   ( query', update' )
 import Data.Acid.Local      ( createCheckpointAndClose )
 
-import Control.Applicative (optional)
+import Control.Applicative
 import Control.Exception.Base (bracket)
 import Control.Monad
 import Control.Monad.IO.Class
@@ -74,10 +74,11 @@ website datadir db = do
                                      ]
                 
               --, dir "photos"  $ ok $ page "Photos" "photos" admin ""
-              , dir "cv"      $ ok $ page "CV" "cv" admin Cv.cvHtml
-              , dir "static"  $ serveStatic (datadir ++ staticDir)
-              , dir "login"   $ ok $ loginPage "/"
-              , dir "logout"  $ (update' db CloseSession) >> Blog.lasts db False
+              , dir "cv"     $ ok $ page "CV" "cv" admin Cv.cvHtml
+              , dir "static" $ serveStatic (datadir ++ staticDir)
+              , dir "login"  $ ok $ loginPage "/"
+              , dir "logout" $ (update' db CloseSession) >> Blog.lasts db False
+              , dir "dump"   $ query' db Dump >>= ok . toResponse
 
               , Blog.lasts db admin
               ]

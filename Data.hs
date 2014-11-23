@@ -30,6 +30,7 @@ import Data.Acid.Advanced   ( query', update' )
 import Data.Acid.Local      ( createCheckpointAndClose )
 import Data.SafeCopy        ( deriveSafeCopy )
 import qualified Data.SafeCopy as C
+import Data.Maybe
 
 import Data.ByteString (ByteString)
 import Data.Time
@@ -56,6 +57,7 @@ initialDataBase = DataBase
 
                   empty
                   1
+
 
 ---- Session
 data Session = Session ByteString UTCTime | Closed
@@ -438,6 +440,48 @@ editProject i = do
 
 
 
+--- Dump 
+dump :: Query DataBase String
+dump = do
+  db <- ask
+  return $
+    "# Dump de la base de donnée du site perso de Timothée Jourde\n"
+    ++ "# au format Emacs Org mode\n#\n\n"
+
+    ++ (section "PROJECTS_DUMP" $ concat $ projectDump <$> (projects db))
+    ++ (section "BLOG_DUMP"     $ concat $ postDump    <$> (toList $ blog db))
+
+
+  where projectDump p =
+          section "PROJECT" $ case (project p) of
+             (Published pub draft) ->
+               section "PUBLISHED" (source pub)
+               ++ fromMaybe "" (section "DRAFT" . source <$> draft)
+  
+             (Draft draft) -> 
+               section "DRAFT" (source draft)
+        
+        postDump p =
+          section "POST" $ case p of
+            (PublishedPost _ pubdate last pub draft) ->
+              meta "PUBLISH_DATE" pubdate
+              ++ fromMaybe "" (meta "LAST_EDIT_DATE" <$> last)
+              ++ section "PUBLISHED" (postSource pub)
+              ++ fromMaybe "" (section "DRAFT" . postSource <$> draft)
+
+            (PostDraft _ draft) ->
+              section "DRAFT" $ postSource draft
+
+        
+        section name content =
+          "\n# DBD # BEGIN " ++ name ++ "\n"
+          ++ content
+          ++ "\n# DBD # END " ++ name ++ "\n"
+
+        meta name x = "\n# DBD # META " ++ name ++ " " ++ show x ++ "\n"
+
+
+
 ---- acid-states templates
 $(deriveSafeCopy 0 'C.base ''Session)
 
@@ -478,4 +522,6 @@ $(makeAcidic ''DataBase [ 'publishNewProject
                            ,'updateSession
                            ,'getSession
                            ,'closeSession
+
+                            ,'dump
                            ])
