@@ -47,24 +47,25 @@ projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ url
       onlyIf edit $ editBar i
   
       H.div  ! class_ "body"    $ preEscapedToHtml $ desc p
-      H.span ! class_ "info"    $ toHtml $ context p
-      H.span ! class_ "info"    $ toHtml $ role p
+
+      forM_ (tags p) $ \x -> 
+        H.span ! class_ "info" $ toHtml x
+      
       br
-      ul ! class_ "info" $ do
-        forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
-        forM_ (otherTechs p) (\x -> li $ toHtml x)
+      
+      onlyIf ((mainTechs  p) /= [] || (otherTechs  p) /= []) $
+        ul ! class_ "info" $ do
+          forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
+          forM_ (otherTechs p) (\x -> li $ toHtml x)
       
     aside ! class_ "images" $ forM_ (images p) (\(s,a) -> img
                                                           ! src (toValue s)
                                                           ! alt (toValue a)
                                                           ! A.title (toValue a))
 
-  H.div ! class_ "more" $ do
-    case (moreDetails p) of Nothing -> return ()
-                            Just d  -> aa ! class_ "button" ! href (toValue d) $ em "+ d'infos" >> " & voir les sources"
-  
-    case (download p) of Nothing -> return ()
-                         Just d  -> aa ! class_ "button" ! href (toValue d) $ "télécharger"
+  onlyIf ((more p) /= []) $ H.div ! class_ "more" $ do
+    forM_ (more p) $ \(ref,str) -> 
+      aa ! class_ "button" ! href (toValue ref) $ toHtml str
 
 
 projectForm p = do
@@ -80,43 +81,7 @@ projectFormLogin p = do
 
   
 projectForm' p = do
-    -- H.label ! for "in_name" $ "nom du projet"
-    -- input ! type_ "text" ! A.name "name" ! A.id "in_name" ! value (toValue $ projectName p)
-    
-    -- H.label ! for "in_kind" $ "catégorie/type de projet"
-    -- input ! type_ "text" ! A.name "kind" ! A.id "in_kind" ! value (toValue $ kind p)
-
-    --H.label ! for "in_desc" $ "description"
     textarea ! A.name "content" ! A.id "in_content" $ toHtml $ Data.source p
-
-    -- H.label ! for "in_format" $ "format de la description"
-    -- select ! A.name "format" ! A.id "in_format" $ do
-    --   option "un certain format" -- en attente de Pandoc
-
-    -- H.label ! for "in_context" $ "contexte/cadre"
-    -- input ! type_ "text" ! A.name "context" ! A.id "in_context" ! value (toValue $ context p)
-
-    -- H.label ! for "in_role" $ "rôle"
-    -- input ! type_ "text" ! A.name "role" ! A.id "in_role" ! value (toValue $ role p)
-
-    -- H.label ! for "in_mainTechs" $ "technos principales"
-    -- input ! type_ "text" ! A.name "mainTechs" ! A.id "in_mainTechs" ! value
-    --   (toValue . concat . fmap (\x -> x ++ ", ") $ mainTechs p)
-
-    -- H.label ! for "in_otherTechs" $ "technos secondaires"
-    -- input ! type_ "text" ! A.name "otherTechs" ! A.id "in_otherTechs" ! value
-    --   (toValue . concat . fmap (\x -> x ++ ", ") $ mainTechs p)
-
-    -- H.label ! for "in_images" $ "images"
-    -- textarea ! A.name "images" ! A.id "in_images" $
-    --   toHtml . concat . fmap (\(s,a) -> s ++ "\n" ++ a ++ "\n\n") $ images p
-
-    -- H.label ! for "in_more" $ "URL à consulter pour + d'infos"
-    -- input ! type_ "text" ! A.name "more" ! A.id "in_more" ! value (toValue $ context p)
-
-    -- H.label ! for "in_more" $ "URL vers téléchargement"
-    -- input ! type_ "text" ! A.name "download" ! A.id "in_download" ! value (toValue $ context p)
-
     br
     input ! type_ "submit" ! A.name "draft"   ! value "Sauvegarder en brouillon"
     input ! type_ "submit" ! A.name "publish" ! value "Publier"
@@ -173,12 +138,10 @@ processForm id_ db admin = do
           
 
 parse source = 
-  let (titles, infos, images', _, body) = extract $ readOrg def $ filter (/='\r') source
+  let (titles, infos, more, images', _, body) = extract $ readOrg def $ filter (/='\r') source
 
-      (name'    : kind'                         :_) = titles        ++ repeat "sans titre"
-      (cr       : mainTechs' : otherTechs' : md :_) = infos         ++ repeat []
-      (context' : role'                         :_) = cr            ++ repeat "non renseigné"
-      (more'    : download'                     :_) = (Just <$> md) ++ repeat Nothing
+      (name'    : kind'                    :_) = titles        ++ repeat "sans titre"
+      (tags'    : mainTechs' : otherTechs' :_) = infos         ++ repeat []
 
   in Project
      name'
@@ -186,13 +149,11 @@ parse source =
      (writeHtmlString' body)
      source
      "Emacs Org mode"
-     context'
-     role'
+     tags'
      mainTechs'
      otherTechs'
      images'
-     more'
-     download'
+     more
 
 
 readListWith d = filter (/="") . fmap (unwords . words) . splitOn d

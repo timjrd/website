@@ -19,6 +19,7 @@ import qualified Text.Pandoc.Walk as Doc
 import Text.Pandoc.Shared (stringify)
 
 import Data.List.Split (splitOn)
+import Data.Char
 
 import Data.Time
 import Data.Time.ISO8601
@@ -56,17 +57,23 @@ onlyIfAuthorized c then' = if c
                            then then'
                            else unauthorized $ loginPage ""
 
+tail' [] = []
+tail' x  = tail x
+
 
 ---- Pandoc
+
+-- recupere des metadonnées dans le corp du document : pas terrible mais pratique
 extract doc@(Pandoc meta blocks) = ( Doc.query titles header
-                                   , Doc.query infos header
+                                   , Doc.query infos  header
+                                   , Doc.query links  header
                                    , Doc.query images doc
                                    , Pandoc meta <$> preview
                                    , Pandoc meta body
                                    )
     
     where (header,body) = let (h,b) = break (==HorizontalRule) blocks 
-                          in  (h,tail b)
+                          in  (h,tail' b)
 
           preview = let (a,b) = break (==HorizontalRule) body
                     in if b == []
@@ -82,8 +89,16 @@ extract doc@(Pandoc meta blocks) = ( Doc.query titles header
           images _ = []
 
           infos :: Block -> [[String]]
-          infos (BulletList l) = [stringify' <$> l]
+          infos (BulletList l) = let res = [stringify' <$> l]
+                                 in if (all (isSpace) $ concat $ concat $ res)
+                                    then [[]] -- un peu sale...
+                                    else res
           infos _ = []
+
+          links :: Inline -> [(String,String)]
+          links (Link c (url,_)) = [(url, stringify c)]
+          links _ = []
+
 
 writeHtmlString' = writeHtmlString options . tweaks
   where options = def { writerHtml5=True
@@ -101,7 +116,7 @@ tweaks = Doc.walk i . Doc.walk b
           i (Link c t) = Link [Span ("", ["pop"], []) c] t
           i x = x
 
-stringify' blocks = tail $ concat $ (\b -> '\n':(stringify'' b)) <$> blocks
+stringify' blocks = tail' $ concat $ (\b -> '\n':(stringify'' b)) <$> blocks
 stringify'' block = case block of
                       (Plain a)      -> stringify a
                       (Para  a)      -> stringify a

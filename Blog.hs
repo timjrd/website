@@ -201,7 +201,7 @@ processForm mi db admin = do
 --            "Emacs Org mode"
 
 parse source =
-    let (titles, infos, images, preview, body) = extract $ readOrg def $ filter (/='\r') source
+    let (titles, infos, _, images, preview, body) = extract $ readOrg def $ filter (/='\r') source
         (t : st :_) = titles ++ repeat ""
     in Post
        (case t of "" -> "Sans titre"

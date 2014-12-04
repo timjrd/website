@@ -15,7 +15,7 @@
 }
 body
 {
-    /* adapté de l'article d'alsacréation */
+    /* adaptÃ© de l'article d'alsacrÃ©ation */
     font-family: "DejaVu Sans Light", ff-dejavu-sans-light, "DejaVu Sans", Verdana, "Bitstream Vera Sans", Geneva, sans-serif;
 
     margin: 0;
@@ -259,14 +259,16 @@ thead td
 }
 .box .more .button
 {
+    border-radius: 0;
 }
 .box .more .button:first-child > .pop
 {
-    border-radius: 0 0 0 15px;
+    border-bottom-left-radius: 15px;
 }
 .box .more .button:last-child > .pop
 {
-    border-radius: 0 15px 15px 0;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
 }
 .box .more .button:nth-child(2n) > .pop
 {

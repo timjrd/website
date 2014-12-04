@@ -272,13 +272,17 @@ data Project = Project { projectName  :: String
                         ,desc         :: String
                         ,source       :: String
                         ,sourceFormat :: String
-                        ,context      :: String
-                        ,role         :: String
+
+                        ,tags         :: [String]
+                        --,context      :: String
+                        --,role         :: String
                         ,mainTechs    :: [String]
                         ,otherTechs   :: [String]
                         ,images       :: [Image]
-                        ,moreDetails  :: Maybe Url
-                        ,download     :: Maybe Url
+                         
+                        --,moreDetails  :: Maybe Url
+                        --,download     :: Maybe Url
+                        ,more :: [(Url,String)]
                         }
              deriving (Data, Typeable)
 
@@ -291,6 +295,7 @@ demoProject = [r|
 
 - cadre du projet
 - rôle personel
+- une autre info...
 
 
 - principales
@@ -302,8 +307,9 @@ demoProject = [r|
 - secondaires
 
 
-- http://url-projet
-- http://url-telechargement
+[[http://url-projet][voir les sources]]
+[[http://url-telechargement][télécharger]]
+[[http://url-telechargement][un autre lien...]]
 
 -----------------------
 
