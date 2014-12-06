@@ -90,9 +90,10 @@ projectFormLogin ids p = do
 projectForm' ids p = do
     textarea ! A.name "content" ! A.id "in_content" $ toHtml $ Data.source p
     br
-    H.label ! for "in_position" $ "placer avant "
-    select ! A.name "position" ! A.id "in_position" $
-      forM_ (zip [0..] ids) (\(n,i) -> (option ! value (toValue (n :: Int)) $ toHtml i))
+    H.label ! for "in_position" $ "placer après "
+    select ! A.name "position" ! A.id "in_position" $ do
+      option ! value "0" $ "(placer en premier)"
+      forM_ (zip [1..] ids) (\(n,i) -> (option ! value (toValue (n :: Int)) $ toHtml i))
                                         
     " "
     H.label ! for "in_tiny" $ "petit truc"
