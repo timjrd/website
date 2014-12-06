@@ -293,7 +293,7 @@ postPreviewHtml p i pub last edit = article ! class_ "post-preview" ! A.id (toVa
                        
   H.div ! class_ "box" $ do
     H.div ! class_ "mask" $ do
-      H.div ! class_ "content"   $ do
+      contentDiv $ do
         h1 $ a ! href (toValue $ "/blog/post/" ++ (show i)) $ toHtml $ postTitle p
         h2 $ toHtml $ postSubTitle p
 
@@ -314,6 +314,7 @@ postPreviewHtml p i pub last edit = article ! class_ "post-preview" ! A.id (toVa
                                           
                               Nothing  -> return ()
   
-  
+  where contentDiv' = H.div ! class_ "content"
+        contentDiv = if (postCover p) == [] then contentDiv' ! A.style "width: 100%;" else contentDiv'
 
 

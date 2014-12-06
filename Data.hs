@@ -272,6 +272,7 @@ data Project = Project { projectName  :: String
                         ,desc         :: String
                         ,source       :: String
                         ,sourceFormat :: String
+                        ,tinyProject  :: Bool
 
                         ,tags         :: [String]
                         --,context      :: String

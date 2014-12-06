@@ -116,7 +116,20 @@ thead td
     text-align: center;
 }
 
+.welcome
+{
+    max-width: 17cm;
+    margin: 60px auto;
 
+    border: 1px solid rgb(220,220,220);
+    border-width: 0 1px;
+    border-radius: 18px;
+    padding: 17px;
+
+    color: rgb(120,120,120);
+    font-style: italic;
+    text-align: justify;
+}
 
 
 
@@ -256,10 +269,13 @@ thead td
 .box .more .button > .pop
 {
     border-radius: 0;
+    padding: 5px 15px;
 }
 .box .more .button
 {
     border-radius: 0;
+
+    font-size: 100%;
 }
 .box .more .button:first-child > .pop
 {
@@ -599,7 +615,7 @@ nav a:hover > span
 .project
 {
     max-width: 27cm;
-    margin: auto;
+    margin: 40px auto;
 }
 .project .desc
 {
@@ -607,22 +623,25 @@ nav a:hover > span
 }
 .project .info
 {
-    border: 1px solid rgb(230,230,230);
+    border: 1px solid rgba(230,230,230,0.7);
+    border-radius: 5px;
     color: rgb(100,100,100);
     display: inline-block;
     padding: 6px;
     margin: 12px 12px 0 0;
+
+    font-size: 90%;
 }
 .project ul.info
 {
     list-style-type: none;
-    font-size: 80%;
 }
 .project ul.info li
 {
     display: inline-block;
     margin-right: 13px;
     vertical-align: middle;
+    font-size: 90%;
 }
 .project ul.info li:last-child
 {
@@ -631,9 +650,31 @@ nav a:hover > span
 .project ul.info li em
 {
     font-style: normal;
-    font-size: 130%;
+    font-size: 110%;
 }
 
+.tiny-projects
+{
+}
+.tiny-projects .project
+{
+    background-color: rgba(255,255,255,0);
+    box-shadow: inset 0 0 0 1px rgb(220,220,220);
+    //border-radius: 0;
+    //box-shadow: none;
+}
+.tiny-projects h1
+{
+    padding: 5px 0 0 5px;
+    font-size: 130%;
+}
+.tiny-projects h2
+{
+    padding: 0 0 10px 5px;
+}
+.project.tiny .info
+{
+}
 
 /***  Blog  ***/
 .tags
@@ -809,6 +850,7 @@ nav a:hover > span
     padding: 7px 15px;
 
     font-size: 100%;
+    font-style: italic;
     font-weight: normal;
     color: rgb(130,130,130); 
 }

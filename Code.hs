@@ -20,6 +20,7 @@ import Text.Pandoc
 
 import Data.Text.Lazy (pack, unpack)
 import Data.List.Split
+import Data.List (partition)
 import Data.Char
 --import Codec.Text.IConv
 
@@ -38,50 +39,67 @@ editBar i = H.div ! class_ "button-bar" $ do
   button' ("/code/unpublish/" ++ (urlEncode i)) "retirer"
 
 projectHtml :: Project -> String -> Bool -> Html
-projectHtml p i edit = article ! class_ "box more project" ! A.id (toValue $ urlEncode $ i) $ do
-  H.div ! class_ "mask" $ do
-    H.div ! class_ "content"   $ do
-      h1 $ toHtml $ projectName p
-      h2 $ toHtml $ kind p
-
-      onlyIf edit $ editBar i
-  
-      H.div  ! class_ "body"    $ preEscapedToHtml $ desc p
-
-      forM_ (tags p) $ \x -> 
-        H.span ! class_ "info" $ toHtml x
+projectHtml p i edit =
+  let classes = toValue $ "box more project" ++ if (tinyProject p) then " tiny" else "" :: String
+      contentDiv' = H.div ! class_ "content"
+      contentDiv  = if (images p) == [] then contentDiv' ! A.style "width: 100%;" else contentDiv'
       
-      br
-      
-      onlyIf ((mainTechs  p) /= [] || (otherTechs  p) /= []) $
-        ul ! class_ "info" $ do
-          forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
-          forM_ (otherTechs p) (\x -> li $ toHtml x)
-      
-    aside ! class_ "images" $ forM_ (images p) (\(s,a) -> img
-                                                          ! src (toValue s)
-                                                          ! alt (toValue a)
-                                                          ! A.title (toValue a))
+  in article ! class_ classes ! A.id (toValue $ urlEncode $ i) $ do
+    H.div ! class_ "mask" $ do
+      contentDiv $ do
+        h1 $ toHtml $ projectName p
+        h2 $ toHtml $ kind p
 
-  onlyIf ((more p) /= []) $ H.div ! class_ "more" $ do
-    forM_ (more p) $ \(ref,str) -> 
-      aa ! class_ "button" ! href (toValue ref) $ toHtml str
+        onlyIf edit $ editBar i
+
+        H.div  ! class_ "body"    $ preEscapedToHtml $ desc p
+
+        forM_ (tags p) $ \x -> 
+          H.span ! class_ "info" $ toHtml x
+
+        br
+
+        onlyIf ((mainTechs  p) /= [] || (otherTechs  p) /= []) $
+          ul ! class_ "info" $ do
+            forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
+            forM_ (otherTechs p) (\x -> li $ toHtml x)
+
+      onlyIf ((images p) /= []) $
+        aside ! class_ "images" $ forM_ (images p) (\(s,a) -> img
+                                                              ! src (toValue s)
+                                                              ! alt (toValue a)
+                                                              ! A.title (toValue a))
+
+    onlyIf ((more p) /= []) $ H.div ! class_ "more" $ do
+      forM_ (more p) $ \(ref,str) -> 
+        aa ! class_ "button" ! href (toValue ref) $ toHtml str
 
 
-projectForm p = do
-  H.form ! action "" ! A.method "POST" ! enctype "multipart/form-data" $ projectForm' p
+projectForm ids p = do
+  H.form ! action "" ! A.method "POST" ! enctype "multipart/form-data" $ projectForm' ids p
   projectHtml p "" False
 
-projectFormLogin p = do
+projectFormLogin ids p = do
   H.form ! action "" ! A.method "POST" ! enctype "multipart/form-data" $ do
     loginAgain
-    projectForm' p
+    projectForm' ids p
     
   projectHtml p "" False
 
-  
-projectForm' p = do
+
+projectForm' ids p = do
     textarea ! A.name "content" ! A.id "in_content" $ toHtml $ Data.source p
+    br
+    H.label ! for "in_position" $ "placer avant "
+    select ! A.name "position" ! A.id "in_position" $
+      forM_ (zip [0..] ids) (\(n,i) -> (option ! value (toValue (n :: Int)) $ toHtml i))
+                                        
+    " "
+    H.label ! for "in_tiny" $ "petit truc"
+    let checkbox = input ! type_ "checkbox" ! A.name "tiny" ! A.id "in_tiny"
+    if (tinyProject p)
+      then checkbox ! checked "checked"
+      else checkbox 
     br
     input ! type_ "submit" ! A.name "draft"   ! value "Sauvegarder en brouillon"
     input ! type_ "submit" ! A.name "publish" ! value "Publier"
@@ -91,12 +109,21 @@ projectForm' p = do
 published db admin = do
   Hap.method GET
   ps <- query' db PublishedProjects
+  
+  let (tinyProjects, projects) =
+        partition (\(Project' _ (Published p _)) -> tinyProject p) ps
+  
   ok $ page "Code" "code" admin $ do
     onlyIf admin $ H.div ! class_ "button-bar center" $ do
       button' "/code/new"    "Nouveau"
       button' "/code/drafts" "Voir les brouillons"
 
-    forM_ ps $ \(Project' i (Published p _)) -> projectHtml p i admin
+    p ! class_ "welcome" $ "Bienvenue à toi chère internaute manifestement égaré dans les méandres du web. Tu ne me connais peut-être pas, mais voici les principaux projets que j'ai dévellopés ou auquels j'ai contribué."
+    forM_ projects     $ \(Project' i (Published p _)) -> projectHtml p i admin
+
+    p ! class_ "welcome" $ "Et si tu t'ennuie tu sera j'en suis sur ravis de trouver ci-après quelques autres petits projets ou réalisations."
+    H.div ! class_ "tiny-projects" $ 
+      forM_ tinyProjects $ \(Project' i (Published p _)) -> projectHtml p i admin
 
 drafts db admin = onlyIfAuthorized admin $ do
   ps <- query' db ProjectDrafts
@@ -112,32 +139,38 @@ viewForm :: (Maybe String) -> (AcidState DataBase) -> Bool -> ServerPart Respons
 viewForm id_ db admin = do
   Hap.method GET
   if not admin
-    then unauthorized $ loginPage ""
-            
-    else case id_ of Nothing  -> ok $ page "Édition" "code" admin (projectForm $ parse demoProject)
-                     (Just i) -> do
-                       pr <- query' db (EditProject i)
-                       case pr of Nothing  -> notFound' "code" admin ("404 :)" :: String)
-                                  (Just p) -> ok $ page "Édition" "code" admin (projectForm p)
+    then unauthorized $ loginPage "" else do
+    
+    ids <- query' db (ProjectIds)
+    case id_ of
+      Nothing  -> ok $ page "Édition" "code" admin (projectForm ids $ parse False demoProject)
+      (Just i) -> do
+        pr <- query' db (EditProject i)
+        case pr of Nothing  -> notFound' "code" admin ("404 :)" :: String)
+                   (Just p) -> ok $ page "Édition" "code" admin (projectForm ids p)
 
 processForm id_ db admin = do
   Hap.method POST
   publish <- toBool <$> (optional $ lookText "publish")
-  p <- parse <$> unpack <$> lookText "content"
+  tiny <- toBool <$> (optional $ lookText "tiny")
+  pos <- read <$> unpack <$> lookText "position"
+  p <- (parse tiny) <$> unpack <$> lookText "content"
   if not admin
-    then unauthorized $ page "Édition" "code" admin (projectFormLogin p)
+    then do
+    ids <- query' db (ProjectIds)
+    unauthorized $ page "Édition" "code" admin (projectFormLogin ids p)
                  
     else if publish
-         then do i <- case id_ of Nothing  -> update' db $ PublishNewProject 0 p
-                                  (Just i) -> update' db $ PublishProject i Nothing p
+         then do i <- case id_ of Nothing  -> update' db $ PublishNewProject pos p
+                                  (Just i) -> update' db $ PublishProject i (Just pos) p
                  seeOther' $ "/code#" ++ (urlEncode i)
                                                         
-         else do i <- case id_ of Nothing  -> update' db $ DraftNewProject 0 p
-                                  (Just i) -> update' db $ DraftProject i Nothing p
+         else do i <- case id_ of Nothing  -> update' db $ DraftNewProject pos p
+                                  (Just i) -> update' db $ DraftProject i (Just pos) p
                  seeOther' $ "/code/edit/" ++ (urlEncode i)
           
 
-parse source = 
+parse tiny source = 
   let (titles, infos, more, images', _, body) = extract $ readOrg def $ filter (/='\r') source
 
       (name'    : kind'                    :_) = titles        ++ repeat "sans titre"
@@ -149,6 +182,7 @@ parse source =
      (writeHtmlString' body)
      source
      "Emacs Org mode"
+     tiny
      tags'
      mainTechs'
      otherTechs'
