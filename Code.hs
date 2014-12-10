@@ -54,15 +54,20 @@ projectHtml p i edit =
 
         H.div  ! class_ "body"    $ preEscapedToHtml $ desc p
 
-        forM_ (tags p) $ \x -> 
-          H.span ! class_ "info" $ toHtml x
 
-        br
+        let tagsNotEmpty  = (tags p) /= []
+            techsNotEmpty = ((mainTechs  p) /= [] || (otherTechs  p) /= [])
 
-        onlyIf ((mainTechs  p) /= [] || (otherTechs  p) /= []) $
-          ul ! class_ "info" $ do
-            forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
-            forM_ (otherTechs p) (\x -> li $ toHtml x)
+        onlyIf (tagsNotEmpty || techsNotEmpty) $ H.div !class_ "infos" $ do
+          forM_ (tags p) $ \x -> 
+            H.span (toHtml x)
+
+          onlyIf (tagsNotEmpty && techsNotEmpty) $ br
+
+          onlyIf techsNotEmpty $ do
+            ul $ do
+              forM_ (mainTechs  p) (\x -> li $ em $ toHtml x)
+              forM_ (otherTechs p) (\x -> li $ toHtml x)
 
       onlyIf ((images p) /= []) $
         aside ! class_ "images" $ forM_ (images p) (\(s,a) -> img
@@ -114,7 +119,7 @@ published db admin = do
   let (tinyProjects, projects) =
         partition (\(Project' _ (Published p _)) -> tinyProject p) ps
   
-  ok $ page "Code" "code" admin $ do
+  ok' $ page "Code" "code" admin $ do
     onlyIf admin $ H.div ! class_ "button-bar center" $ do
       button' "/code/new"    "Nouveau"
       button' "/code/drafts" "Voir les brouillons"
@@ -128,7 +133,7 @@ published db admin = do
 
 drafts db admin = onlyIfAuthorized admin $ do
   ps <- query' db ProjectDrafts
-  ok $ page "Code" "code" admin $
+  ok' $ page "Code" "code" admin $
     forM_ ps $ \(Project' i (Draft p)) -> projectHtml p i admin
 
 unpublish i db admin = onlyIfAuthorized admin $ do
@@ -144,11 +149,11 @@ viewForm id_ db admin = do
     
     ids <- query' db (ProjectIds)
     case id_ of
-      Nothing  -> ok $ page "Édition" "code" admin (projectForm ids $ parse False demoProject)
+      Nothing  -> ok' $ page "Édition" "code" admin (projectForm ids $ parse False demoProject)
       (Just i) -> do
         pr <- query' db (EditProject i)
         case pr of Nothing  -> notFound' "code" admin ("404 :)" :: String)
-                   (Just p) -> ok $ page "Édition" "code" admin (projectForm ids p)
+                   (Just p) -> ok' $ page "Édition" "code" admin (projectForm ids p)
 
 processForm id_ db admin = do
   Hap.method POST
@@ -159,7 +164,7 @@ processForm id_ db admin = do
   if not admin
     then do
     ids <- query' db (ProjectIds)
-    unauthorized $ page "Édition" "code" admin (projectFormLogin ids p)
+    unauthorized' $ page "Édition" "code" admin (projectFormLogin ids p)
                  
     else if publish
          then do i <- case id_ of Nothing  -> update' db $ PublishNewProject pos p
@@ -174,7 +179,7 @@ processForm id_ db admin = do
 parse tiny source = 
   let (titles, infos, more, images', _, body) = extract $ readOrg def $ filter (/='\r') source
 
-      (name'    : kind'                    :_) = titles        ++ repeat "sans titre"
+      (name'    : kind'                    :_) = titles        ++ repeat ""
       (tags'    : mainTechs' : otherTechs' :_) = infos         ++ repeat []
 
   in Project

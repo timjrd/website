@@ -40,7 +40,7 @@ main = do
       website datadir db
 
 
---website :: ServerPart Response
+--website :: a -> b -> ServerPart Response
 website datadir db = do
   admin <- authenticate (datadir ++ "/PASSWORD") db
   r <- loginRedirect
@@ -74,7 +74,7 @@ website datadir db = do
                                      ]
                 
               --, dir "photos"  $ ok $ page "Photos" "photos" admin ""
-              , dir "cv"     $ ok $ page "CV" "cv" admin Cv.cvHtml
+              , dir "cv"     $ ok' $ page "CV" "cv" admin Cv.cvHtml
               , dir "static" $ serveStatic (datadir ++ staticDir)
               , dir "login"  $ ok $ loginPage "/"
               , dir "logout" $ (update' db CloseSession) >> Blog.lasts db False

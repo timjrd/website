@@ -26,14 +26,17 @@ import Data.Time.ISO8601
 
 import Happstack.Lite
 import Happstack.Lite as Hap
+import Happstack.Server.Internal.Monads
+import Happstack.Server.Types 
+
+import Network.HTTP (urlEncode, urlDecode)
 
 ---- Paths
-staticDir    = "/static"   :: String
-stylesheet   = "/static/style.css" :: String
-faceImg      = "/static/face.jpg"  :: String
-cvPdf        = "/static/timothee-jourde-cv.pdf" :: String
---imgDir = staticDir ++ "/img"
-
+staticDir  = "/static"   :: String
+stylesheet = "/static/style.css" :: String
+faceImg    = "/static/face.jpg"  :: String
+cvPdf      = "/static/timothee-jourde-cv.pdf" :: String
+domain     = "me-timjrd.rhcloud.com/"
 
 ---- Utils
 x <$< f = fmap f x
@@ -43,10 +46,12 @@ mToHtml x = toHtml $ case x of (Just a) -> a
 toBool a = case a of Nothing -> False
                      Just _  -> True
 
+ok' = (=<<) ok
+unauthorized' = (=<<) unauthorized 
 seeOther' :: String -> ServerPart Response
 seeOther' url = seeOther url $ toResponse ()
 
-notFound' current admin msg = notFound $ page "Introuvable" current admin $
+notFound' current admin msg = notFound >> page "Introuvable" current admin $
                               H.div ! A.id "notFound" $ toHtml msg
 
 aa = a . (H.span ! class_ "pop")
@@ -57,8 +62,8 @@ onlyIfAuthorized c then' = if c
                            then then'
                            else unauthorized $ loginPage ""
 
-tail' [] = []
-tail' x  = tail x
+tail' []     = []
+tail' (x:xs) = xs
 
 
 ---- Pandoc
@@ -72,13 +77,15 @@ extract doc@(Pandoc meta blocks) = ( Doc.query titles header
                                    , Pandoc meta body
                                    )
     
-    where (header,body) = let (h,b) = break (==HorizontalRule) blocks 
+    where (header,body') = let (h,b) = break (==HorizontalRule) blocks 
                           in  (h,tail' b)
 
-          preview = let (a,b) = break (==HorizontalRule) body
-                    in if b == []
-                       then Nothing
-                       else Just a
+          (preview',rest) = break (==HorizontalRule) body'
+
+          body    = preview' ++ (tail' rest)
+          preview = if rest == []
+                    then Nothing
+                    else Just preview'
     
           titles :: Block -> [String]
           titles (Header _ _ x) = [stringify x]
@@ -147,44 +154,56 @@ stringify'' block = case block of
 
 
 ---- Templates
-page :: ToMarkup a => String -> String -> Bool -> a -> Response
-page thetitle current admin thebody = toResponse $ docTypeHtml $ do
-  H.head $ do
-    H.title (toHtml $ "Timothée Jourde - " ++ thetitle)
-    link ! rel "stylesheet" ! type_ "text/css" ! href (toValue stylesheet)
-    
-  body ! class_ (toValue current) $ do
-    header $ do
-      if admin
-        then aa ! A.class_ "logout button" ! href "/logout" $ "logout"
-        else return ()
-    
-      H.div ! class_ "main" $ do
-        H.div $ do
-          h2 "site perso"
-          h1 "timothée jourde"
+page :: ToMarkup a => String -> String -> Bool -> a -> ServerPart Response
+page thetitle current admin thebody = do
+  rq <- askRq
+  
+  return $ toResponse $ docTypeHtml $ do
+    H.head $ do
+      H.title (toHtml $ "Timothée Jourde - " ++ thetitle)
+      link !rel "stylesheet" !type_ "text/css" !href (toValue stylesheet)
 
-        nav $ do
-          entry "/blog"   "blog"
-          entry "/code"   "code"
-        --entry "/photos" "photos"
-          entry "/cv"     "cv"
-    
-    toHtml thebody
+    body !class_ (toValue current) $ do
+      header $ do
+        if admin
+          then aa ! A.class_ "logout button" ! href "/logout" $ "logout"
+          else return ()
 
-    footer ! A.id "bottom" $ ul $ do
-      li $ aa ! href "" $ "à propos"
-      li $ "valide " >> (aa ! href "/" $ "xhtml") >> " & " >> (aa ! href "/" $ "css")
-      --li $ "random kiss to " >> (aa ! href "" $ "someone")
-      if not admin
-        then li $ aa ! A.class_ "login"  ! href "/login"  $ "login"
-        else return ()
+        H.div ! class_ "main" $ do
+          H.div $ do
+            h1 "timothée jourde"
+            h2 "site perso"
 
-         
+
+          nav $ do
+            entry "/blog"   "blog"
+            entry "/code"   "code"
+          --entry "/photos" "photos"
+            entry "/cv"     "cv"
+
+      toHtml thebody
+
+      footer ! A.id "bottom" $ ul $ do
+        li $ a ! href "" $ "à propos"
+        li $ do
+          "valide "
+          a !href (toValue $ w3cValidator $ domain ++ rqUri rq) $ "xhtml"
+          " & "
+          a !href (toValue $ w3cValidator $ domain ++ stylesheet) $ "css"
+        --li $ "random kiss to " >> (aa ! href "" $ "someone")
+        if not admin
+          then li $ a ! A.class_ "login"  ! href "/login"  $ "login"
+          else return ()
+
+
 
   where entry :: String -> String -> Html
         entry ref name = let e = if current == name then a ! class_ "current" else a
                          in e ! href (toValue ref) $ H.span $ (toHtml name)
+
+        w3cValidator x = "http://validator.w3.org/check?uri=" ++ (urlEncode x)
+
+
 
 loginPage :: String -> Response
 loginPage goto = toResponse $ docTypeHtml $ do

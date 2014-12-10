@@ -93,7 +93,7 @@ viewPost i db admin = do
   case mp of
     Nothing  -> notFound' "blog" admin ("404 :)" :: String)
     (Just (PublishedPost _ pub last p _)) ->
-      ok $ page "Blog" "blog" admin $
+      ok' $ page "Blog" "blog" admin $
       postHtml p i
       (showMDate ct $ Just pub)
       (showMDate ct last)
@@ -103,11 +103,11 @@ viewPost i db admin = do
 
 lasts db admin = do
   p <- viewBlogPage' 1 db admin
-  ok $ page "Blog" "blog" admin $ p
+  ok' $ page "Blog" "blog" admin $ p
 
 viewBlogPage n db admin = do
   p <- viewBlogPage' n db admin
-  ok $ page "Blog" "blog" admin $ p
+  ok' $ page "Blog" "blog" admin $ p
 
 viewBlogPage' n db admin = do
   (ps,pre) <- query' db (BlogPage n)
@@ -122,7 +122,7 @@ viewBlogPage' n db admin = do
     case () of
       _ | n >  2    -> next $ "/blog/page/" ++ (show $ n-1) ++ "#bottom"
         | n == 2    -> next ("/blog#bottom" :: String)
-        | otherwise -> H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "Derniers Billets"
+        | otherwise -> H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "derniers billets"
                   
     forM_ ps $ \(PublishedPost i pub last p _) -> postPreviewHtml p i
                                                   (showMDate ct $ Just pub)
@@ -134,7 +134,7 @@ viewBlogPage' n db admin = do
 drafts db admin = onlyIfAuthorized admin $ do
   ps <- query' db GetPostDrafts
 
-  ok $ page "Blog" "blog" admin $ do
+  ok' $ page "Blog" "blog" admin $ do
     H.div ! class_ "thread-label" $ H.div ! class_ "center" $ h3 $ "brouillons"
     forM_ ps $ \(PostDraft i p) -> postPreviewHtml p i
                                    Nothing Nothing admin
@@ -147,7 +147,7 @@ viewForm mi db admin = do
   Hap.method GET
   onlyIfAuthorized admin $ do
     case mi of
-      Nothing -> ok $ page "Édition" "blog" admin $ postForm (parse demoPost) 0 Nothing Nothing
+      Nothing -> ok' $ page "Édition" "blog" admin $ postForm (parse demoPost) 0 Nothing Nothing
       (Just i) -> do
         p'' <- query' db (GetPost i True)
         case p'' of
@@ -158,7 +158,7 @@ viewForm mi db admin = do
                                           (PostDraft     _ p)                   -> (p,Nothing,Nothing)
 
             ct <- liftIO $ getCurrentTime
-            ok $ page "Édition" "blog" admin $ postForm p i (showMDate ct pub) (showMDate ct last)
+            ok' $ page "Édition" "blog" admin $ postForm p i (showMDate ct pub) (showMDate ct last)
   
   
 processForm mi db admin = do
@@ -168,7 +168,7 @@ processForm mi db admin = do
   p <- parse <$> unpack <$> lookText "content"
 
   if not admin
-  then unauthorized $ page "Édition" "blog" admin (postFormLogin p 0 Nothing Nothing)
+  then unauthorized' $ page "Édition" "blog" admin (postFormLogin p 0 Nothing Nothing)
   else if publish
        then do i <- case mi of Nothing  -> update' db $ PublishNewPost p ct
                                (Just i) -> update' db $ PublishPost i p ct
@@ -204,8 +204,7 @@ parse source =
     let (titles, infos, _, images, preview, body) = extract $ readOrg def $ filter (/='\r') source
         (t : st :_) = titles ++ repeat ""
     in Post
-       (case t of "" -> "Sans titre"
-                  _  -> t)
+       t
        st
        (writeHtmlString' <$> preview)
        (take 4 images)

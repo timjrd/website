@@ -11,13 +11,13 @@ import qualified Text.Blaze.XHtml5.Attributes as A
 
 cvHtml = H.div ! class_ "cv-body" $ do
   h1 ! class_ "print" $ "me-timjrd.rhcloud.com/cv"
-  aa ! href (toValue cvPdf) ! class_ "button noprint" $ "version imprimable (PDF)"
+  aa ! href (toValue cvPdf) ! class_ "button noprint" $ "version imprimable (pdf)"
   H.div ! class_ "contact" $ do
-      img ! src "static/face.jpg" ! alt "me"
+      img ! class_ "tiny-box" ! src "static/face.jpg" ! alt "me"
       h2 "Timothée Jourde"
       h3 "étudiant en informatique"
       H.div $ do
-          aa ! href "mailto:itim.lcf@gmail.com" $ "itim.lcf@gmail.com"
+          a ! href "mailto:itim.lcf@gmail.com" $ "itim.lcf@gmail.com"
           br
           "06 79 50 56 22"
       H.div $ do
@@ -51,7 +51,7 @@ cvHtml = H.div ! class_ "cv-body" $ do
       li "Formalismes UML & MCD. Bonnes capacités d'abstraction/modélisation."
       li "Formation en Gestion de Projets & méthodes Agiles"
   table $ do
-      caption "quelques réalisations"
+      caption $ "quelques réalisations " >> (a !href "/code" $ "+ d'infos et autres")
       tr $ do
           th "en cours"
           td "Site web perso. dynamique, gestion blog ad-hoc et design from scratch"

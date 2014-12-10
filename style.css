@@ -19,7 +19,7 @@ body
     font-family: "DejaVu Sans Light", ff-dejavu-sans-light, "DejaVu Sans", Verdana, "Bitstream Vera Sans", Geneva, sans-serif;
 
     margin: 0;
-    padding: 0 15px;
+    padding: 0;
 
     color: rgb(45,45,45);
     background-image: url(/static/bg.png); /* site de kde */
@@ -252,7 +252,7 @@ thead td
 }
 .box aside img:last-child
 {
-    box-shadow: 500px 0 0 500px rgb(220,220,220);
+    box-shadow: 1000px 0 0 1000px rgb(220,220,220);
 
     position: relative;
     z-index: 10;
@@ -464,8 +464,12 @@ code > span.er { font-weight: bold; }
 /***  Header, Footer, Menu ***/
 header
 {
-    margin-bottom: 50px;
-    //background-color: rgba(0,0,0,0.9);
+    margin-bottom: 40px;
+    background-color: rgb(100,100,100);
+
+    color: rgba(255,255,255,0.7);
+
+    position: relative;
 }
 header .main
 {
@@ -473,18 +477,28 @@ header .main
 }
 header .main > div
 {
-    display: inline-block;
-    vertical-align: bottom;
-    text-align: right;
-    direction: rtl;
+    /* display: inline-block; */
+    /* vertical-align: bottom; */
+    /* text-align: right; */
+    /* direction: rtl; */
 
-    width: 0px;
-    white-space: nowrap;
+    /* width: 0px; */
+    /* white-space: nowrap; */
 
-    margin: 0 5px -2px 0;
+    /* margin: 0 5px -2px 0; */
 
-    font-size: 155%;
-    color: rgba(0,0,0,0.35);
+    font-size: 110%;
+
+    transform: translateY(-50%);
+
+    padding-left: 10px;
+    text-align: left;
+    position: absolute;
+    left: 0;
+    top: 50%;
+}
+header h1, header h2
+{
 }
 header h1
 {
@@ -506,31 +520,32 @@ header .logout
     margin: 5px;
 }
 
+
 footer
 {
-    color: rgb(110,110,110);
-    font-size: 70%;
-    margin: 100px 0 5px 0;
+    color: rgba(255,255,255,0.8);
+    font-size: 80%;
+    margin: 100px 0 0 0;
+    padding: 10px;
     text-align: center;
+
+    background-color: rgb(100,100,100);
 }
 footer a
 {
     border: none;
+    color: rgb(255,255,255);
 }
 footer ul
 {
     list-style-type: none;
     padding: 0;
-}
-footer li:first-child
-{
-    border-left: none;
+    margin: 0;
 }
 footer li
 {
     display: inline;
-    padding: 3px 15px;
-    border-left: 1px solid rgba(0,0,0,0.05);
+    padding: 0 20px;
 }
 footer .heart
 {
@@ -545,22 +560,19 @@ nav
     white-space: nowrap;
 
     font-size: 370%;
-    margin: -10px 0 0 0;
-
+    margin: 0 0 0 0;
 }
-nav a:first-child, nav a:first-child > span
-{ padding-left: 0; }
 nav a
 {
     display: inline-block;
 
     margin: 0;
-    padding: 10px 1.3% 0 1.3%;
+    padding: 5px 1.3% 5px 1.3%;
     text-decoration: none;
 
-    color: white;
+    color: rgb(210,210,210);
 
-    border-bottom: solid rgba(0,0,0,0.06) 2px;
+    //border-top: solid rgb(150,150,150) 4px;
 }
 nav a > span
 {
@@ -568,14 +580,15 @@ nav a > span
     padding: 0 15px;
 
     position: relative;
-    top: -5px;
+    top: -6px;
 
-    text-shadow:  0 1px 0 rgb(210,210,210)
-                 ,0 2px 0 rgb(210,210,210)
-                 ,0 3px 0 rgb(210,210,210)
-                 ,0 4px 0 rgb(210,210,210)
-                 ,0 5px 0 rgb(210,210,210)
-                 ,0 2px 4px rgba(0,0,0,0.2);
+    text-shadow:  0 1px 0 rgb(75,75,75)
+                 ,0 2px 0 rgb(75,75,75)
+                 ,0 3px 0 rgb(75,75,75)
+                 ,0 4px 0 rgb(75,75,75)
+                 ,0 5px 0 rgb(75,75,75)
+		 ,0 6px 0 rgb(75,75,75);
+                 /*,0 3px 8px rgba(255,255,255,0.7);*/
 
     transition: all 0.1s linear;
 }
@@ -583,32 +596,22 @@ nav a:visited
 { /*color: inherit;*/ }
 nav a.current, nav a.current:hover
 {
-    padding-bottom: 0;
-
-    color: black;
-    border-bottom: solid black 2px;
-}
-nav a.current > span, nav a.current:hover > span
-{
-    top: 0;
-    text-shadow: none;
+    background-color: rgb(110,110,110);
+    color: white;
+    //border-top: solid white 4px;
 }
 
 nav a:hover
 {
-    padding-bottom: 0;
-    border-color: rgba(0,0,0,0.3);
-    background-color: transparent;
+    background-color: rgb(110,110,110);
     box-shadow: none;
-
-    transition: border-color 0.3s 0.1s linear;
 }
-nav a:hover > span
+nav a:hover > span, nav a.current > span, nav a.current:hover > span
 {
     top: -2px;
-    text-shadow:  0 1px 0 rgb(210,210,210)
-                 ,0 2px 0 rgb(210,210,210)
-                 ,0 2px 4px rgba(0,0,0,0.2);
+    text-shadow:  0 1px 0 rgb(75,75,75)
+                 ,0 2px 0 rgb(75,75,75);
+                 /*,0 2px 4px rgba(0,0,0,0.2);*/
 }
 
 /***  Code  ***/
@@ -916,7 +919,7 @@ body.photos nav a:hover
 .cv-body .button
 {
     float: right; 
-    font-size: 150%; 
+    font-size: 110%; 
 }
 .cv-body .contact > h2
 {
@@ -940,10 +943,6 @@ body.photos nav a:hover
 
     margin: 0 0 35px 0;
 }
-.cv-body .contact a
-{
-    margin-bottom: 4px;
-}
 .cv-body .contact > div
 {
     display: inline-block;
@@ -953,8 +952,10 @@ body.photos nav a:hover
 .cv-body .contact > img
 {
     float: left;
-    height: 80px;
+    height: 85px;
     margin-right: 10px;
+    padding: 0px;
+    //border-width: 0;
 }
 .cv-body .tiny-box
 {
@@ -962,7 +963,7 @@ body.photos nav a:hover
     
     background-color: rgba(255,255,255,0.2);
     /* box-shadow: 4px 4px 0px rgb(200,200,200); */
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 
     border: 3px solid white;
     
@@ -1013,7 +1014,7 @@ body.photos nav a:hover
 .cv-body li
 {
     border-left: 6px solid white;
-    box-shadow: -6px 0 4px -6px rgba(0,0,0,0.07);
+    box-shadow: -6px 0 4px -6px rgba(0,0,0,0.1);
     margin: 0;
     margin-top: 9px;
     padding-left: 7px;
@@ -1036,9 +1037,14 @@ body.photos nav a:hover
     font-size: 125%;
     font-weight: normal;
 }
+.cv-body caption a
+{
+    font-size: 80%;
+    margin-left: 8px;
+}
 .cv-body table
 {
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     border-collapse: collapse;
 
     border: 3px solid white;
@@ -1368,8 +1374,7 @@ body.photos nav a:hover
     }
     .cv-body table, .cv-body .tiny-box
     {
-	/*background-image: url(/static/bg.png); /* Neverland theme Kde.org */
-	background: linear-gradient(rgba(255,255,255,0.4),rgba(255,255,255,0.4)), url(/static/bg.png);
+	background-image: url(/static/bg.png); /* Neverland theme Kde.org */
 	background-repeat: repeat;
     }
     .cv-body li
