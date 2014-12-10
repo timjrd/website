@@ -3,9 +3,9 @@
 modif() { stat Builds/bin/SERVER --printf '%Y'; }
 
 
-mkdir -p .data-dir
-ln -srT static .data-dir/static
-ln -sr  *.css .data-dir/static
+mkdir -p .data-dir/static
+ln -sr  static/* .data-dir/static/
+ln -sr  *.css    .data-dir/static
 
 last=0
 while true

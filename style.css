@@ -204,13 +204,13 @@ thead td
 {
     padding: 15px 0 0 15px;
     font-weight: bold;
-    font-size: 160%;
+    font-size: 190%;
 }
 .box h2
 {
     padding: 0 0 15px 15px;
     font-weight: normal;
-    font-size: 110%;
+    font-size: 120%;
     border-bottom: 1px solid rgb(240,240,240);
     margin-bottom: 25px;
 }
@@ -365,7 +365,10 @@ thead td
 {
     margin-bottom: 20px;
 }
-
+.body > *:last-child
+{
+    margin-bottom: 0;
+}
 
 .body ul
 {
@@ -624,7 +627,11 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
 {
     margin-bottom: 20px;
 }
-.project .info
+.infos
+{
+    margin-top: 12px;
+}
+.project .infos > *
 {
     border: 1px solid rgba(230,230,230,0.7);
     border-radius: 5px;
@@ -635,22 +642,22 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
 
     font-size: 90%;
 }
-.project ul.info
+.project .infos > ul
 {
     list-style-type: none;
 }
-.project ul.info li
+.project .infos > ul > li
 {
     display: inline-block;
     margin-right: 13px;
     vertical-align: middle;
     font-size: 90%;
 }
-.project ul.info li:last-child
+.project .infos > ul > li:last-child
 {
     margin-right: 0;
 }
-.project ul.info li em
+.project .infos > ul > li em
 {
     font-style: normal;
     font-size: 110%;
@@ -662,9 +669,10 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
 .tiny-projects .project
 {
     background-color: rgba(255,255,255,0);
-    box-shadow: inset 0 0 0 1px rgb(220,220,220);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06), inset 0 0 0 1px rgb(220,220,220);
     //border-radius: 0;
     //box-shadow: none;
+
 }
 .tiny-projects h1
 {
@@ -674,9 +682,12 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
 .tiny-projects h2
 {
     padding: 0 0 10px 5px;
+    margin-bottom: 12px;
+    font-size: 110%;
 }
-.project.tiny .info
+.project.tiny .infos
 {
+    margin-top: 0;
 }
 
 /***  Blog  ***/
@@ -764,7 +775,7 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
 {
     display: block;
     color: rgb(100,100,100);
-    padding: 20px 10px 10px 15px;
+    padding: 0 10px 10px 15px;
     border: none;
     font-size: 80%;
 }
@@ -794,7 +805,7 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
 }
 .post .header h1
 {
-    font-size: 260%;
+    font-size: 280%;
 }
 .post .header h2
 {
@@ -824,7 +835,7 @@ nav a:hover > span, nav a.current > span, nav a.current:hover > span
     padding: 15px 15px 10px 15px;
     background-color: rgba(255,255,255,0.3);
     //border: 1px solid rgb(220,220,220);
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     margin-bottom: 25px;
 }
 
@@ -1344,6 +1355,7 @@ body.photos nav a:hover
     {
 	background-image: none;
 	padding: 0;
+	color: black;
     }
     body.cv > *
     {
