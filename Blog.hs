@@ -251,7 +251,7 @@ prev ref = H.div ! class_ "prev thread-label" $ do
 
 
 dateHtml pub last = let lastHtml = last <$< \(u,d) -> H.span $ do " modifié " ; (time' u) $ toHtml d
-                        pubHtml  = pub  <$< \(u,d) -> H.em $ do "publié " ; (time' u) ! pubdate "" $ toHtml d
+                        pubHtml  = pub  <$< \(u,d) -> H.em $ do "publié " ; (time' u) $ toHtml d
 
                     in if last == Nothing && pub == Nothing then return () else do
                       H.div ! class_ "date" $ do
@@ -300,11 +300,12 @@ postPreviewHtml p i pub last edit = article ! class_ "post-preview" ! A.id (toVa
   
         H.div ! class_ "body" $ preEscapedToHtml $ case (postPreview p) of (Just a) -> a
                                                                            Nothing  -> (postBody p)
-      
-      aside ! class_ "images" $ forM_ (postCover p) $ \(s,a) -> img
-                                                                ! src (toValue s)
-                                                                ! alt (toValue a)
-                                                                ! A.title (toValue a)
+
+      onlyIf ((postCover p) /= []) $
+        aside ! class_ "images" $ forM_ (postCover p) $ \(s,a) -> img
+                                                                  ! src (toValue s)
+                                                                  ! alt (toValue a)
+                                                                  ! A.title (toValue a)
 
       case (postPreview p) of (Just _) -> a
                                           ! class_ "read-more"

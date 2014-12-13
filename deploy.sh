@@ -17,8 +17,8 @@ function binaries
 
 function static
 {
-    echo ':: compiling...'
-    make static
+    echo ':: compiling css...'
+    make css
 
     echo -e '\n:: uploading static files...'
     rsync -czr static/* Builds/static/* '5439726e5973ca6f4e000012@me-timjrd.rhcloud.com:~/app-root/data/static'

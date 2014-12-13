@@ -55,7 +55,7 @@ notFound' current admin msg = notFound >> page "Introuvable" current admin $
                               H.div ! A.id "notFound" $ toHtml msg
 
 aa = a . (H.span ! class_ "pop")
-time' d = time ! datetime (toValue $ formatISO8601 d)
+time' d = time ! datetime (toValue $ formatISO8601Millis d)
 
 onlyIf c then' = if c then then' else return ()
 onlyIfAuthorized c then' = if c
@@ -113,7 +113,7 @@ writeHtmlString' = writeHtmlString options . tweaks
                       }
 
 tweaks :: Pandoc -> Pandoc
-tweaks = Doc.walk i . Doc.walk b
+tweaks = Doc.walk b . Doc.walk i
     where b :: Block -> Block
           b (Header level a c) = (Header (level+1) a c)
           b t@Table{} = Div ("", ["table"], []) [t]
@@ -160,6 +160,7 @@ page thetitle current admin thebody = do
   
   return $ toResponse $ docTypeHtml $ do
     H.head $ do
+      meta ! charset "UTF-8"
       H.title (toHtml $ "Timothée Jourde - " ++ thetitle)
       link !rel "stylesheet" !type_ "text/css" !href (toValue stylesheet)
 
@@ -184,7 +185,7 @@ page thetitle current admin thebody = do
       toHtml thebody
 
       footer ! A.id "bottom" $ ul $ do
-        li $ a ! href "" $ "à propos"
+        li $ a ! href "/code" $ "à propos"
         li $ do
           "valide "
           a !href (toValue $ w3cValidator $ domain ++ rqUri rq) $ "xhtml"
