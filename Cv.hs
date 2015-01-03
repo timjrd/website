@@ -9,7 +9,9 @@ import Text.Blaze.XHtml5.Attributes
 import qualified Text.Blaze.XHtml5 as H
 import qualified Text.Blaze.XHtml5.Attributes as A
 
-cvHtml = H.div ! class_ "cv-body" $ do
+import Data.Time
+
+cvHtml currentTime = H.div ! class_ "cv-body" $ do
   h1 ! class_ "print" $ "me-timjrd.rhcloud.com/cv"
   aa ! href (toValue cvPdf) ! class_ "button noprint" $ "version imprimable (pdf)"
   H.div ! class_ "contact" $ do
@@ -25,7 +27,7 @@ cvHtml = H.div ! class_ "cv-body" $ do
           br
           "33950 Lège-Cap-Ferret"
       H.div $ do
-          "19 ans"
+          (toHtml age) >> " ans"
           br
           "Permis B"
   h2 "Informatique"
@@ -104,3 +106,6 @@ cvHtml = H.div ! class_ "cv-body" $ do
           li "Ski alpin, bon niveau"
           li "Niveau 1 de plongée"
           li "Voyages : Gabon, Sénégal, New-York, Europe"
+
+  where age = let (y,m,d) = toGregorian $ utctDay currentTime
+              in y - 1994 - 1 + (if m>11 || (m==11 && d>=28) then 1 else 0)

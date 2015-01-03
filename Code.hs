@@ -124,10 +124,10 @@ published db admin = do
       button' "/code/new"    "Nouveau"
       button' "/code/drafts" "Voir les brouillons"
 
-    p ! class_ "welcome" $ "Bienvenue à toi chère internaute manifestement égaré dans les méandres du web. Tu ne me connais peut-être pas, mais voici les principaux projets que j'ai développés ou auxquels j'ai contribué."
+    p ! class_ "welcome" $ "Bienvenue à toi cher internaute manifestement égaré dans les méandres du web. Tu ne me connais peut-être pas, mais voici les principaux projets que j'ai développé ou auxquels j'ai contribué. Oui c'est un peu vide."
     forM_ projects     $ \(Project' i (Published p _)) -> projectHtml p i admin
 
-    p ! class_ "welcome" $ "Et si tu t'ennuie tu seras j'en suis sur ravis de trouver ci-après quelques autres petits projets ou réalisations."
+    p ! class_ "welcome" $ "Et si tu t'ennuies tu seras j'en suis sûr ravi de trouver ci-après quelques autres petites choses."
     H.div ! class_ "tiny-projects" $ 
       forM_ tinyProjects $ \(Project' i (Published p _)) -> projectHtml p i admin
 

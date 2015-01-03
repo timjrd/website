@@ -185,7 +185,7 @@ page thetitle current admin thebody = do
       toHtml thebody
 
       footer ! A.id "bottom" $ ul $ do
-        li $ a ! href "/code" $ "à propos"
+        --li $ a ! href "/code" $ "à propos"
         li $ do
           "valide "
           a !href (toValue $ w3cValidator $ domain ++ rqUri rq) $ "xhtml"

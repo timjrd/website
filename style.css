@@ -15,7 +15,7 @@
 }
 body
 {
-    /* adaptÃ© de l'article d'alsacrÃ©ation */
+    /* adapté de l'article d'alsacréation */
     font-family: "DejaVu Sans Light", ff-dejavu-sans-light, "DejaVu Sans", Verdana, "Bitstream Vera Sans", Geneva, sans-serif;
 
     margin: 0;
@@ -303,7 +303,7 @@ thead td
 {
     display: inline-block;
     margin-bottom: -1px;
-    min-width: 19px;
+    min-width: 0.7em;
     position: relative;
     z-index: 10;
 }
@@ -319,12 +319,12 @@ thead td
 .body a:hover
 {
     background-color: white;
-    box-shadow: 18px 0 0 white, 18px 0 0 1px black, 0 0 0 1px black;
+    box-shadow: 0.6em 0 0 white, 1.3em 0 0 white;/*, 18px 0 0 1px black, 0 0 0 1px black;*/
     color: black;
 }
 .body a:hover > .pop
 {
-    left: 16px;
+    left: 1.1em;
     border-bottom: 1px solid white;
 }
 .body a:hover > .pop::before
@@ -600,6 +600,7 @@ footer
     text-align: center;
 
     background-color: rgb(100,100,100);
+    box-shadow: 0 1000px 0 1000px rgb(100,100,100);
 }
 footer a
 {
@@ -1374,7 +1375,6 @@ body.photos nav a:hover
 /* 	margin: 0 0 5px; */
 /* 	padding: 0; */
 /* 	width: 50%; */
-/* 	//border: 2px solid red; */
 
 /* 	color: white; */
 
@@ -1384,7 +1384,6 @@ body.photos nav a:hover
 /*     { color: inherit; } */
 /*     nav a.current, nav a.current:hover */
 /*     { */
-/* 	//color: black; */
 /* 	border-bottom: solid black 2px; */
 /*     } */
 /*     nav a:hover */

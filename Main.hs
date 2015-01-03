@@ -74,7 +74,10 @@ website datadir db = do
                                      ]
                 
               --, dir "photos"  $ ok $ page "Photos" "photos" admin ""
-              , dir "cv"     $ ok' $ page "CV" "cv" admin Cv.cvHtml
+              , dir "cv"     $ do
+                   now <- liftIO $ getCurrentTime
+                   ok' $ page "CV" "cv" admin (Cv.cvHtml now)
+                   
               , dir "static" $ serveStatic (datadir ++ staticDir)
               , dir "login"  $ ok $ loginPage "/"
               , dir "logout" $ (update' db CloseSession) >> Blog.lasts db False
