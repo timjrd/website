@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# this comment is a test  
 modif() { stat Builds/bin/SERVER --printf '%Y'; }
 
 
