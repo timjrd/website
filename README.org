@@ -1,4 +1,5 @@
-*  [[http://me-timjrd.rhcloud.com/][me-timjrd.rhcloud.com]]
+EDIT: Ce site n'est plus en ligne depuis longtemps.
+
 Voici les sources de mon petit site perso. dynamique écrit en [[http://www.haskell.org][Haskell]]. Si vous lisez le code prenez un peu d'aspirine avant, c'est mon premier projet en fonctionnelle.
 
 Le serveur est compilé/linké statiquement en local (~80Mo), et hebergé sur [[https://www.openshift.com/][OpenShift]]. Il utilise principalement :
