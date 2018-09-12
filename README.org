@@ -1,4 +1,4 @@
-EDIT: Ce site n'est plus en ligne depuis longtemps.
+*Ce site n'est plus en ligne depuis longtemps.*
 
 Voici les sources de mon petit site perso. dynamique écrit en [[http://www.haskell.org][Haskell]]. Si vous lisez le code prenez un peu d'aspirine avant, c'est mon premier projet en fonctionnelle.
 
